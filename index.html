@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopee Afiliados Pro — Ultimate</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root {
+  --orange:#FF5722; --orange-h:#FF7043; --orange-dim:rgba(255,87,34,.1);
+  --bg:#0A0A0D; --s1:#121215; --s2:#1A1A1F; --s3:#222228;
+  --border:rgba(255,255,255,.06); --border-a:rgba(255,87,34,.35);
+  --text:#EEEAE4; --muted:#6E6B76; --muted2:#9E9AA6;
+  --green:#3DBA7E; --yellow:#F5A623; --red:#FF5C5C;
+  --blue:#5B9BF8; --purple:#9B6DFF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ─── LAYOUT ─── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:260px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto;transition:transform .3s}
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column}
+
+/* ─── SIDEBAR ─── */
+.sb-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-mark{width:34px;height:34px;background:var(--orange);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.sb-name{font-size:.95rem;font-weight:800;letter-spacing:-.02em}
+.sb-name span{color:var(--orange)}
+.sb-ver{font-family:'Space Mono',monospace;font-size:.55rem;color:var(--muted);background:var(--s2);padding:2px 6px;border-radius:4px;margin-left:auto;flex-shrink:0}
+.sb-sec{padding:14px 12px 6px}
+.sb-sec-lbl{font-family:'Space Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 8px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--muted2);transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{background:var(--orange-dim);color:var(--orange)}
+.nav-icon{font-size:1rem;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--orange);color:#fff;font-family:'Space Mono',monospace;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:100px}
+
+/* ─── CREDENTIALS ─── */
+.cred-wrap{margin:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.cred-ttl{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.cred-field{margin-bottom:8px}
+.cred-lbl{font-size:.68rem;color:var(--muted);margin-bottom:4px;display:block}
+.cred-input{width:100%;background:var(--s1);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-family:'Space Mono',monospace;font-size:.72rem;outline:none;transition:border-color .2s}
+.cred-input:focus{border-color:var(--border-a)}
+.btn-connect{width:100%;margin-top:4px;padding:9px;background:var(--orange);color:#fff;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-connect:hover{background:var(--orange-h)}
+.btn-connect:disabled{opacity:.4;cursor:not-allowed}
+.conn-status{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted);padding:8px 0 0}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.online{background:var(--green);animation:pulse 2s infinite}
+.dot.offline{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── RATE LIMIT ─── */
+.rate-wrap{margin:0 12px 12px;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px}
+.rate-lbl{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.rate-track{height:3px;background:var(--s3);border-radius:100px}
+.rate-fill{height:100%;border-radius:100px;background:var(--green);transition:width .5s,background .3s}
+
+/* ─── TOPBAR ─── */
+.topbar{padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:rgba(10,10,13,.92);backdrop-filter:blur(16px);position:sticky;top:0;z-index:40}
+.topbar-title{font-size:1rem;font-weight:800;letter-spacing:-.02em;flex:1}
+.topbar-title small{display:block;font-size:.7rem;font-weight:400;color:var(--muted);font-family:'Space Mono',monospace}
+.tb-btn{padding:7px 14px;background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:7px;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.tb-btn:hover{border-color:var(--border-a);color:var(--orange)}
+.tb-btn:disabled{opacity:.3;cursor:not-allowed}
+.menu-toggle{display:none;width:36px;height:36px;background:var(--s2);border:1px solid var(--border);border-radius:7px;cursor:pointer;align-items:center;justify-content:center;font-size:1.1rem;color:var(--text)}
+
+/* ─── PAGES ─── */
+.page{display:none;padding:24px 28px}
+.page.active{display:block}
+
+/* ─── PRESET CHIPS ─── */
+.preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.preset-chip{padding:5px 12px;background:var(--s2);border:1px solid var(--border);color:var(--muted2);border-radius:100px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.preset-chip:hover{border-color:var(--border-a);color:var(--orange)}
+.preset-chip.active{background:var(--orange-dim);border-color:var(--border-a);color:var(--orange)}
+
+/* ─── FILTER BAR ─── */
+.filter-bar{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px 22px;margin-bottom:20px}
+.filter-grid{display:grid;gap:10px;margin-bottom:10px}
+.fg-4{grid-template-columns:repeat(4,1fr)}
+.fg-5{grid-template-columns:repeat(5,1fr)}
+.fg-kw{grid-template-columns:1fr auto;margin-bottom:0}
+.f-group{display:flex;flex-direction:column;gap:5px}
+.f-lbl{font-family:'Space Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.f-input,.f-select{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:7px;font-family:'Space Mono',monospace;font-size:.78rem;outline:none;transition:border-color .2s;width:100%}
+.f-input:focus,.f-select:focus{border-color:var(--border-a)}
+.f-select option{background:var(--s2)}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.btn-search{padding:8px 20px;background:var(--orange);color:#fff;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-search:hover{background:var(--orange-h)}
+.btn-search:disabled{opacity:.4;cursor:not-allowed}
+.btn-reset{padding:8px 12px;background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:7px;cursor:pointer;transition:all .2s;font-size:.9rem}
+.btn-reset:hover{border-color:var(--border-a);color:var(--text)}
+
+/* ─── ACTIVE FILTER TAGS ─── */
+.active-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:0}
+.filter-tag{display:flex;align-items:center;gap:5px;background:var(--orange-dim);border:1px solid var(--border-a);color:var(--orange);padding:3px 10px;border-radius:100px;font-family:'Space Mono',monospace;font-size:.62rem}
+.filter-tag button{background:none;border:none;color:inherit;cursor:pointer;padding:0;font-size:.75rem;line-height:1;opacity:.7}
+.filter-tag button:hover{opacity:1}
+
+/* ─── STATS BAR ─── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:13px 15px;transition:border-color .2s}
+.stat-card:hover{border-color:rgba(255,87,34,.2)}
+.stat-card-lbl{font-family:'Space Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+.stat-card-val{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat-card-sub{font-size:.65rem;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ─── RESULTS BAR ─── */
+.results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.results-count{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--muted)}
+.results-count strong{color:var(--text)}
+.view-toggle{display:flex;gap:4px}
+.view-btn{width:30px;height:30px;background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.view-btn.active{background:var(--orange-dim);border-color:var(--border-a);color:var(--orange)}
+
+/* ─── PRODUCT GRID ─── */
+.products-grid{display:grid;gap:14px}
+.pg-4{grid-template-columns:repeat(auto-fill,minmax(255px,1fr))}
+.pg-2{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
+.pg-list{grid-template-columns:1fr}
+
+/* ─── PRODUCT CARD ─── */
+.pcard{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s;position:relative}
+.pcard:hover{border-color:rgba(255,87,34,.25);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.pcard.favorited{border-color:rgba(245,166,35,.3)}
+.badge-row{position:absolute;top:9px;left:9px;display:flex;gap:4px;z-index:2;flex-wrap:wrap;max-width:calc(100% - 50px)}
+.badge{font-family:'Space Mono',monospace;font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.badge-new{background:var(--orange);color:#fff}
+.badge-hot{background:var(--red);color:#fff}
+.badge-gold{background:var(--yellow);color:#0A0A0D;font-weight:800}
+.badge-seller{background:rgba(91,155,248,.18);color:var(--blue);border:1px solid rgba(91,155,248,.3)}
+.fav-btn{position:absolute;top:9px;right:9px;z-index:2;width:28px;height:28px;background:rgba(10,10,13,.72);border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s;backdrop-filter:blur(4px)}
+.fav-btn:hover,.fav-btn.on{color:var(--yellow);border-color:rgba(245,166,35,.4)}
+.card-img-wrap{width:100%;height:185px;overflow:hidden;position:relative}
+.card-img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.pcard:hover .card-img{transform:scale(1.04)}
+.card-img-ph{width:100%;height:100%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:2.4rem}
+.comm-overlay{position:absolute;bottom:8px;right:8px;background:rgba(10,10,13,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:3px 9px;font-family:'Space Mono',monospace;font-size:.76rem;font-weight:700}
+.comm-overlay.high{color:var(--green);border-color:rgba(61,186,126,.3)}
+.comm-overlay.mid{color:var(--yellow);border-color:rgba(245,166,35,.3)}
+.comm-overlay.low{color:var(--orange);border-color:rgba(255,87,34,.3)}
+.card-body{padding:13px}
+.card-shop-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.shop-name{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.shop-chip{font-family:'Space Mono',monospace;font-size:.53rem;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.chip-mall{background:rgba(155,109,255,.15);color:var(--purple)}
+.chip-star{background:rgba(245,166,35,.12);color:var(--yellow)}
+.chip-sp{background:rgba(91,155,248,.12);color:var(--blue)}
+.card-name{font-size:.86rem;font-weight:600;line-height:1.4;margin-bottom:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mini-metrics{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:11px}
+.mm{background:var(--s2);border-radius:6px;padding:7px 9px}
+.mm-lbl{font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted);margin-bottom:2px}
+.mm-val{font-size:.92rem;font-weight:800}
+.price-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.c-price{font-size:1.05rem;font-weight:800;color:var(--orange)}
+.c-stars{font-size:.7rem;color:var(--yellow);display:flex;align-items:center;gap:3px}
+.c-stars span{color:var(--muted);font-family:'Space Mono',monospace;font-size:.62rem}
+.score-row{margin-bottom:11px}
+.score-lbl-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.score-lbl{font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted)}
+.score-val{font-family:'Space Mono',monospace;font-size:.56rem;font-weight:700}
+.score-track{height:4px;background:var(--s3);border-radius:100px}
+.score-fill{height:100%;border-radius:100px;transition:width .5s .1s}
+.card-actions{display:flex;gap:5px;padding-top:9px;border-top:1px solid var(--border)}
+.act-btn{flex:1;padding:7px 5px;border-radius:6px;font-family:'Syne',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;text-decoration:none}
+.act-copy{background:var(--s2);color:var(--text)}
+.act-copy:hover{background:var(--s3)}
+.act-copy.done{background:rgba(61,186,126,.1);color:var(--green)}
+.act-open{background:var(--orange);color:#fff}
+.act-open:hover{background:var(--orange-h)}
+.act-detail{width:32px;flex:none;background:var(--s2);color:var(--muted)}
+.act-detail:hover{color:var(--text);background:var(--s3)}
+
+/* list view */
+.pcard.list-v{display:flex;flex-direction:row}
+.pcard.list-v .card-img-wrap{width:130px;height:auto;flex-shrink:0}
+.pcard.list-v .card-body{flex:1}
+.pcard.list-v .mini-metrics{grid-template-columns:repeat(4,1fr)}
+
+/* ─── PAGINATION ─── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:28px 0 14px}
+.pg-btn{padding:7px 14px;background:var(--s1);border:1px solid var(--border);color:var(--muted2);border-radius:7px;font-family:'Space Mono',monospace;font-size:.73rem;cursor:pointer;transition:all .15s}
+.pg-btn:hover{border-color:var(--border-a);color:var(--orange)}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+.pg-info{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted)}
+
+/* ─── EMPTY / SKELETON ─── */
+.empty-state{text-align:center;padding:72px 20px;color:var(--muted)}
+.empty-icon{font-size:3rem;opacity:.3;margin-bottom:14px}
+.empty-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:7px}
+.empty-desc{font-size:.84rem;line-height:1.6;max-width:380px;margin:0 auto}
+.skeleton{background:linear-gradient(90deg,var(--s1) 25%,var(--s2) 50%,var(--s1) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:5px}
+@keyframes shimmer{to{background-position:-200% 0}}
+.skel-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.skel-img{height:185px}
+.skel-body{padding:13px}
+.skel-line{height:11px;margin-bottom:8px}
+
+/* ─── HISTORY ─── */
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-item{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s}
+.history-item:hover{border-color:var(--border-a)}
+.h-icon{font-size:1.1rem;width:30px;text-align:center}
+.h-body{flex:1}
+.h-title{font-size:.84rem;font-weight:600;margin-bottom:2px}
+.h-meta{font-family:'Space Mono',monospace;font-size:.63rem;color:var(--muted)}
+.h-time{font-family:'Space Mono',monospace;font-size:.63rem;color:var(--muted);margin-left:auto;flex-shrink:0}
+.btn-sm{padding:4px 11px;background:var(--s2);border:1px solid var(--border);color:var(--muted2);border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-sm:hover{border-color:var(--border-a);color:var(--orange)}
+
+/* ─── ANALYTICS ─── */
+.an-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.an-kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:13px 15px;transition:border-color .15s}
+.an-kpi:hover{border-color:rgba(255,87,34,.2)}
+.an-kpi-lbl{font-family:'Space Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+.an-kpi-val{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.an-kpi-sub{font-size:.65rem;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace}
+.an-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.an-tab{padding:6px 14px;background:var(--s2);border:1px solid var(--border);color:var(--muted2);border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s}
+.an-tab:hover{border-color:var(--border-a);color:var(--orange)}
+.an-tab.active{background:var(--orange-dim);border-color:var(--border-a);color:var(--orange)}
+.an-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.an-chart-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px}
+.an-chart-card.wide{grid-column:1/-1}
+.an-chart-title{font-family:'Space Mono',monospace;font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.an-chart-hint{font-size:.58rem;color:var(--muted);opacity:.6}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap.tall{height:300px}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-family:'Space Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.data-table td{padding:9px 12px;font-size:.81rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.data-table tr:hover td{background:var(--s2)}
+.table-tag{padding:2px 7px;border-radius:4px;font-family:'Space Mono',monospace;font-size:.58rem;font-weight:700}
+.tag-green{background:rgba(61,186,126,.1);color:var(--green)}
+.tag-yellow{background:rgba(245,166,35,.1);color:var(--yellow)}
+.tag-orange{background:var(--orange-dim);color:var(--orange)}
+
+/* ─── MODAL ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.76);backdrop-filter:blur(10px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--s1);border:1px solid var(--border);border-radius:18px;width:100%;max-width:620px;max-height:88vh;overflow-y:auto;position:relative}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+.modal-header img{width:70px;height:70px;object-fit:cover;border-radius:8px;background:var(--s2);flex-shrink:0}
+.modal-title-block{flex:1;min-width:0}
+.modal-title{font-size:.98rem;font-weight:700;line-height:1.4;margin-bottom:3px}
+.modal-shop{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--muted)}
+.modal-close{background:var(--s2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.modal-body{padding:22px}
+.modal-sec-ttl{font-family:'Space Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;margin-top:18px}
+.modal-sec-ttl:first-child{margin-top:0}
+.modal-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.modal-m{background:var(--s2);border-radius:8px;padding:11px}
+.modal-m-lbl{font-family:'Space Mono',monospace;font-size:.57rem;color:var(--muted);margin-bottom:3px}
+.modal-m-val{font-size:1.05rem;font-weight:800}
+.modal-actions{display:flex;gap:9px;margin-top:18px}
+.modal-actions .act-btn{flex:1;padding:10px;font-size:.84rem}
+
+/* ─── PREFETCH BAR ─── */
+.prefetch-bar{position:fixed;top:0;left:260px;right:0;height:2px;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .4s;z-index:300;pointer-events:none}
+.prefetch-bar.loading{transform:scaleX(.65)}
+.prefetch-bar.done{transform:scaleX(1);transition:transform .15s}
+.prefetch-bar.hide{opacity:0;transition:opacity .3s .2s}
+.next-ghost{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--border);border-radius:100px;padding:7px 18px;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--muted);display:none;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:90;pointer-events:none}
+.next-ghost.visible{display:flex}
+.ghost-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 1.2s infinite}
+
+/* ─── TOASTS ─── */
+.toasts{position:fixed;bottom:22px;right:22px;z-index:400;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:.81rem;display:flex;align-items:center;gap:9px;min-width:240px;max-width:340px;animation:slideIn .25s ease,fadeOut .3s 2.7s forwards;box-shadow:0 4px 22px rgba(0,0,0,.4)}
+.toast.success{border-color:rgba(61,186,126,.3)}
+.toast.error{border-color:rgba(255,92,92,.3)}
+.toast.info{border-color:rgba(91,155,248,.3)}
+@keyframes slideIn{from{transform:translateX(18px);opacity:0}}
+@keyframes fadeOut{to{opacity:0;transform:translateY(8px)}}
+
+/* ─── ERROR BOX ─── */
+.error-box{background:rgba(255,92,92,.07);border:1px solid rgba(255,92,92,.2);border-radius:10px;padding:13px 17px;color:var(--red);font-family:'Space Mono',monospace;font-size:.79rem;margin-bottom:18px;line-height:1.6;display:none}
+
+/* ─── VARREDURA MULTI-PÁGINA ─── */
+.sweep-bar {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 18px;
+  display: none;
+}
+.sweep-bar.active { display: block; }
+.sweep-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sweep-title {
+  font-family: 'Space Mono', monospace; font-size: .72rem;
+  color: var(--yellow); display: flex; align-items: center; gap: 8px;
+}
+.sweep-spinner {
+  width: 12px; height: 12px;
+  border: 2px solid rgba(245,166,35,.3);
+  border-top-color: var(--yellow);
+  border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.sweep-cancel {
+  font-family: 'Space Mono', monospace; font-size: .62rem;
+  color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 5px; padding: 3px 10px; cursor: pointer;
+  transition: all .15s;
+}
+.sweep-cancel:hover { border-color: var(--red); color: var(--red); }
+.sweep-track {
+  height: 6px; background: var(--s3); border-radius: 100px;
+  margin-bottom: 8px; overflow: hidden;
+}
+.sweep-fill {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  transition: width .4s ease;
+}
+.sweep-meta {
+  display: flex; justify-content: space-between;
+  font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--muted);
+}
+.sweep-mode-badge {
+  display: none; align-items: center; gap: 6px;
+  background: rgba(245,166,35,.1); border: 1px solid rgba(245,166,35,.3);
+  color: var(--yellow); padding: 4px 12px; border-radius: 6px;
+  font-family: 'Space Mono', monospace; font-size: .65rem; font-weight: 700;
+}
+.sweep-mode-badge.visible { display: flex; }
+
+/* Stats bar extra para modo varredura */
+.sweep-stats {
+  display: none; grid-template-columns: repeat(4,1fr);
+  gap: 12px; margin-bottom: 20px;
+}
+.sweep-stats.visible { display: grid; }
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .page{padding:18px}
+  .fg-4,.fg-5{grid-template-columns:1fr 1fr}
+  .stats-bar,.an-kpis{grid-template-columns:repeat(2,1fr)}
+  .an-charts-grid{grid-template-columns:1fr}
+  .menu-toggle{display:flex}
+  .prefetch-bar{left:0}
+}
+@media(max-width:520px){
+  .fg-4,.fg-5{grid-template-columns:1fr}
+  .stats-bar,.an-kpis{grid-template-columns:1fr 1fr}
+  .products-grid.pg-2,.products-grid.pg-4{grid-template-columns:1fr}
+}
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49}
+.sb-backdrop.open{display:block}
+</style>
+</head>
+<body>
+
+<div class="toasts" id="toasts"></div>
+<div class="prefetch-bar" id="prefetchBar"></div>
+<div class="next-ghost" id="nextGhost"><div class="ghost-dot"></div><span>Pré-carregando próxima página…</span></div>
+<div class="sb-backdrop" id="sbBackdrop" onclick="closeSidebar()"></div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="mName">
+  <div class="modal-box">
+    <div class="modal-header">
+      <img id="mImg" src="" alt="" onerror="this.style.display='none'">
+      <div class="modal-title-block">
+        <div class="modal-title" id="mName"></div>
+        <div class="modal-shop" id="mShop"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec-ttl">Comissões</div>
+      <div class="modal-metrics">
+        <div class="modal-m"><div class="modal-m-lbl">Total</div><div class="modal-m-val" id="mCTotal" style="color:var(--green)"></div></div>
+        <div class="modal-m"><div class="modal-m-lbl">Shopee</div><div class="modal-m-val" id="mCShopee"></div></div>
+        <div class="modal-m"><div class="modal-m-lbl">Seller</div><div class="modal-m-val" id="mCSeller" style="color:var(--yellow)"></div></div>
+      </div>
+      <div class="modal-sec-ttl">Preço & Métricas</div>
+      <div class="modal-metrics">
+        <div class="modal-m"><div class="modal-m-lbl">Preço Mín.</div><div class="modal-m-val" id="mPMin" style="color:var(--orange)"></div></div>
+        <div class="modal-m"><div class="modal-m-lbl">Preço Máx.</div><div class="modal-m-val" id="mPMax"></div></div>
+        <div class="modal-m"><div class="modal-m-lbl">Vendas</div><div class="modal-m-val" id="mSales"></div></div>
+        <div class="modal-m"><div class="modal-m-lbl">Avaliação</div><div class="modal-m-val" id="mRating" style="color:var(--yellow)"></div></div>
+        <div class="modal-m"><div class="modal-m-lbl">Desconto</div><div class="modal-m-val" id="mDiscount"></div></div>
+        <div class="modal-m"><div class="modal-m-lbl">Tipo Loja</div><div class="modal-m-val" id="mShopType"></div></div>
+      </div>
+      <div class="modal-sec-ttl">Score de Oportunidade</div>
+      <div id="mScoreWrap"></div>
+      <div class="modal-actions">
+        <button class="act-btn act-copy" id="mCopyBtn" onclick="modalCopy()">📋 Copiar Link</button>
+        <a class="act-btn act-open" id="mOpenLink" href="#" target="_blank" rel="noopener noreferrer">🛒 Ver no Shopee</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-mark">🛍️</div>
+      <div class="sb-name">Shopee<span>Pro</span></div>
+      <div class="sb-ver">Ultimate</div>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-sec-lbl">Navegação</div>
+      <button class="nav-item active" onclick="goPage('search')"><span class="nav-icon">🔍</span>Buscar Produtos<span class="nav-badge" id="navCount" style="display:none">0</span></button>
+      <button class="nav-item" onclick="goPage('favorites')"><span class="nav-icon">⭐</span>Favoritos<span class="nav-badge" id="favCount">0</span></button>
+      <button class="nav-item" onclick="goPage('history')"><span class="nav-icon">🕒</span>Histórico</button>
+      <button class="nav-item" onclick="goPage('analytics')"><span class="nav-icon">📊</span>Analytics</button>
+    </div>
+    <div style="flex:1"></div>
+    <div class="rate-wrap">
+      <div class="rate-lbl"><span>Rate Limit</span><span id="rateText">—</span></div>
+      <div class="rate-track"><div class="rate-fill" id="rateFill" style="width:0%"></div></div>
+    </div>
+    <div class="cred-wrap">
+      <div class="cred-ttl">🔑 Credenciais API</div>
+      <div class="cred-field"><label class="cred-lbl" for="appId">App ID</label><input class="cred-input" type="text" id="appId" placeholder="Ex: 1234567890" autocomplete="off"></div>
+      <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:10px;line-height:1.5">
+        O Secret fica seguro no servidor Netlify — configure em <strong style="color:var(--yellow)">Site Settings → Environment Variables → SHOPEE_SECRET</strong>
+      </div>
+      <button class="btn-connect" id="btnConnect" onclick="connect()">Conectar à API</button>
+      <div class="conn-status"><div class="dot offline" id="connDot"></div><span id="connText">Aguardando App ID</span></div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+      <div class="topbar-title"><span id="pageTitle">Buscar Produtos</span><small id="pageSubtitle">Encontre oportunidades de alta comissão</small></div>
+      <button class="tb-btn" id="btnExport" onclick="exportCSV()" disabled>⬇ CSV</button>
+      <div class="sweep-mode-badge" id="sweepModeBadge">🔍 Modo Varredura</div>
+      <button class="tb-btn" id="btnSweep" onclick="startSweep()" disabled title="Busca automática em múltiplas páginas e rankeia os melhores pelo Gold Score">⚡ Varredura</button>
+      <button class="tb-btn" onclick="goPage('favorites')">⭐ <span id="favCountTop">0</span></button>
+    </div>
+
+    <!-- ── SEARCH ── -->
+    <div class="page active" id="page-search">
+      <div class="preset-row">
+        <div class="preset-chip active" onclick="applyPreset(this,'default')">🎯 Padrão</div>
+        <div class="preset-chip" onclick="applyPreset(this,'maxComm')">🔥 Máx. Comissão</div>
+        <div class="preset-chip" onclick="applyPreset(this,'recentes')">🆕 Recentes</div>
+        <div class="preset-chip" onclick="applyPreset(this,'keySellers')">⭐ Key Sellers</div>
+        <div class="preset-chip" onclick="applyPreset(this,'desconto')">💸 Desconto</div>
+        <div class="preset-chip" onclick="applyPreset(this,'maisVendidos')">📦 Mais Vendidos</div>
+        <div class="preset-chip" onclick="applyPreset(this,'goldHidden')" style="background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.3);color:var(--yellow)">🏆 Joias Escondidas</div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-grid fg-4">
+          <div class="f-group"><div class="f-lbl">Tipo de Listagem</div><select class="f-select" id="fListType"><option value="1">Maior Comissão</option><option value="0">Recomendados</option><option value="2">Top Performance</option></select></div>
+          <div class="f-group"><div class="f-lbl">Ordenar por</div><select class="f-select" id="fSortType"><option value="5">Comissão ↑</option><option value="2">Mais Vendidos</option><option value="3">Maior Preço</option><option value="4">Menor Preço</option><option value="1">Relevância</option></select></div>
+          <div class="f-group"><div class="f-lbl">Resultados</div><select class="f-select" id="fLimit"><option value="20">20 produtos</option><option value="40">40 produtos</option><option value="60">60 produtos</option></select></div>
+          <div class="f-group"><div class="f-lbl">Tipo de Loja</div><select class="f-select" id="fShopType"><option value="all">Todos</option><option value="mall">Mall</option><option value="star">Star</option><option value="starplus">Star+</option></select></div>
+        </div>
+        <div class="filter-grid fg-5">
+          <div class="f-group"><div class="f-lbl">Key Sellers</div><select class="f-select" id="fKeySeller"><option value="">Todos</option><option value="true">Apenas Key Sellers</option></select></div>
+          <div class="f-group"><div class="f-lbl">Com AMS</div><select class="f-select" id="fAms"><option value="true">Sim (com AMS)</option><option value="">Todos</option></select></div>
+          <div class="f-group"><div class="f-lbl">Comissão mínima %</div><input class="f-input" type="number" id="fMinComm" placeholder="Ex: 5" min="0" max="100" step="0.5"></div>
+          <div class="f-group"><div class="f-lbl">Avaliação mínima</div><select class="f-select" id="fMinRating"><option value="0">Qualquer</option><option value="3">≥ 3 ★</option><option value="4">≥ 4 ★</option><option value="4.5">≥ 4.5 ★</option></select></div>
+          <div class="f-group"><div class="f-lbl">Score mínimo</div><input class="f-input" type="number" id="fMinScore" placeholder="Ex: 50" min="0" max="100" step="1"></div>
+        </div>
+        <div class="filter-grid fg-5">
+          <div class="f-group"><div class="f-lbl">Velocidade mín. vendas/dia</div><input class="f-input" type="number" id="fMinVelocity" placeholder="Ex: 10" min="0" step="1" title="Vendas por dia desde que o produto entrou no programa"></div>
+          <div class="f-group"><div class="f-lbl">Baixa disputa mín. (0–100)</div><input class="f-input" type="number" id="fMinDispute" placeholder="Ex: 40" min="0" max="100" step="1" title="Estimativa inversa de concorrência entre afiliados"></div>
+          <div class="f-group"><div class="f-lbl">Páginas para varrer</div>
+            <select class="f-select" id="fSweepPages" title="Quantas páginas buscar em modo varredura">
+              <option value="3">3 páginas (~60–180 prod.)</option>
+              <option value="5" selected>5 páginas (~100–300 prod.)</option>
+              <option value="8">8 páginas (~160–480 prod.)</option>
+              <option value="10">10 páginas (~200–600 prod.)</option>
+            </select>
+          </div>
+          <div class="f-group"><div class="f-lbl">Exibir top N resultados</div>
+            <select class="f-select" id="fSweepTop">
+              <option value="20" selected>Top 20</option>
+              <option value="40">Top 40</option>
+              <option value="60">Top 60</option>
+              <option value="100">Top 100</option>
+            </select>
+          </div>
+          <div class="f-group" style="grid-column:span 3">
+            <div class="f-lbl" style="color:var(--blue)">⚡ Modo Varredura — busca N páginas e exibe os melhores rankeados pelo Gold Score</div>
+            <div style="font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);padding-top:4px">Consome N requisições do rate limit (30/min). Use com o preset 🏆 Joias Escondidas para melhor resultado.</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="filter-grid fg-kw">
+          <div class="f-group"><div class="f-lbl">Palavra-chave (opcional)</div><input class="f-input" type="text" id="fKeyword" placeholder="Ex: fone bluetooth, creme facial..."></div>
+          <div style="display:flex;gap:7px;align-items:flex-end"><button class="btn-search" id="btnSearch" onclick="search()" disabled>🔍 Buscar</button><button class="btn-reset" onclick="clearFilters()" title="Limpar filtros">↺</button></div>
+        </div>
+      </div>
+      <div class="active-tags" id="activeTags"></div>
+      <div class="error-box" id="errorBox"><span id="errorMsg"></span></div>
+
+      <!-- Barra de progresso da varredura -->
+      <div class="sweep-bar" id="sweepBar">
+        <div class="sweep-header">
+          <div class="sweep-title">
+            <div class="sweep-spinner"></div>
+            Varrendo páginas… <span id="sweepStatus">0 / 0</span>
+          </div>
+          <button class="sweep-cancel" onclick="cancelSweep()">✕ Cancelar</button>
+        </div>
+        <div class="sweep-track"><div class="sweep-fill" id="sweepFill" style="width:0%"></div></div>
+        <div class="sweep-meta">
+          <span id="sweepDetail">Buscando página 1…</span>
+          <span id="sweepFound">0 produtos coletados</span>
+        </div>
+      </div>
+
+      <!-- Stats da varredura (substitui statsBar normal) -->
+      <div class="sweep-stats" id="sweepStats">
+        <div class="stat-card">
+          <div class="stat-card-lbl">Páginas varridas</div>
+          <div class="stat-card-val" id="swPages" style="color:var(--yellow)">—</div>
+          <div class="stat-card-sub" id="swPagesSub">de um total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-lbl">Produtos analisados</div>
+          <div class="stat-card-val" id="swTotal">—</div>
+          <div class="stat-card-sub">antes dos filtros</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-lbl">Melhor Gold Score</div>
+          <div class="stat-card-val" id="swTopGold" style="color:var(--yellow)">—</div>
+          <div class="stat-card-sub" id="swTopGoldProd">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-lbl">Exibindo top</div>
+          <div class="stat-card-val" id="swShowing" style="color:var(--green)">—</div>
+          <div class="stat-card-sub">por gold score</div>
+        </div>
+      </div>
+      <div class="stats-bar" id="statsBar" style="display:none">
+        <div class="stat-card"><div class="stat-card-lbl">Produtos</div><div class="stat-card-val" id="sTotal">—</div><div class="stat-card-sub" id="sTotalSub">—</div></div>
+        <div class="stat-card"><div class="stat-card-lbl">Maior Comissão</div><div class="stat-card-val" id="sTopComm" style="color:var(--green)">—</div><div class="stat-card-sub" id="sTopProd">—</div></div>
+        <div class="stat-card"><div class="stat-card-lbl">Comissão Média</div><div class="stat-card-val" id="sAvgComm" style="color:var(--yellow)">—</div><div class="stat-card-sub">desta página</div></div>
+        <div class="stat-card"><div class="stat-card-lbl">Score Médio</div><div class="stat-card-val" id="sScore" style="color:var(--blue)">—</div><div class="stat-card-sub">oportunidade</div></div>
+      </div>
+      <div class="results-bar" id="resultsBar" style="display:none">
+        <div class="results-count"><strong id="rCount">0</strong> produtos encontrados</div>
+        <div style="display:flex;gap:7px;align-items:center">
+          <div class="view-toggle">
+            <button class="view-btn active" id="vg4" onclick="setView('pg-4')" title="Grade">⊞</button>
+            <button class="view-btn" id="vg2" onclick="setView('pg-2')" title="2 colunas">▦</button>
+            <button class="view-btn" id="vlist" onclick="setView('pg-list')" title="Lista">☰</button>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" id="initialState"><div class="empty-icon">🔌</div><div class="empty-title">Conecte sua conta para começar</div><div class="empty-desc">Insira seu App ID e Secret na sidebar e clique em Conectar.</div></div>
+      <div class="products-grid pg-4" id="productsGrid"></div>
+      <div class="pagination" id="pagination" style="display:none">
+        <button class="pg-btn" id="pgPrev" onclick="changePage(-1)">← Anterior</button>
+        <div class="pg-info">Página <strong id="pgNum">1</strong></div>
+        <button class="pg-btn" id="pgNext" onclick="changePage(1)">Próxima →</button>
+      </div>
+    </div>
+
+    <!-- ── FAVORITES ── -->
+    <div class="page" id="page-favorites">
+      <div class="empty-state" id="favEmpty"><div class="empty-icon">⭐</div><div class="empty-title">Nenhum favorito ainda</div><div class="empty-desc">Clique em ⭐ em qualquer produto para salvá-lo aqui.</div></div>
+      <div class="products-grid pg-4" id="favsGrid"></div>
+    </div>
+
+    <!-- ── HISTORY ── -->
+    <div class="page" id="page-history">
+      <div class="empty-state" id="histEmpty"><div class="empty-icon">🕒</div><div class="empty-title">Nenhuma busca ainda</div><div class="empty-desc">Suas buscas aparecerão aqui para repetição rápida.</div></div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="page" id="page-analytics">
+      <div class="empty-state" id="analyticsEmpty"><div class="empty-icon">📊</div><div class="empty-title">Sem dados ainda</div><div class="empty-desc">Faça ao menos uma busca para ver os analytics.</div></div>
+      <div id="analyticsContent" style="display:none">
+        <div class="an-kpis">
+          <div class="an-kpi"><div class="an-kpi-lbl">Produtos analisados</div><div class="an-kpi-val" id="akTotal">—</div><div class="an-kpi-sub">acumulados na sessão</div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">Comissão média</div><div class="an-kpi-val" id="akAvgComm" style="color:var(--yellow)">—</div><div class="an-kpi-sub" id="akAvgSub">—</div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">Score médio</div><div class="an-kpi-val" id="akScore" style="color:var(--blue)">—</div><div class="an-kpi-sub">oportunidade 0–100</div></div>
+          <div class="an-kpi"><div class="an-kpi-lbl">Com seller comm.</div><div class="an-kpi-val" id="akSeller" style="color:var(--green)">—</div><div class="an-kpi-sub" id="akSellerSub">—</div></div>
+        </div>
+        <div class="an-tabs">
+          <button class="an-tab active" onclick="switchAnTab(this,'overview')">Visão Geral</button>
+          <button class="an-tab" onclick="switchAnTab(this,'scatter')">Score × Comissão</button>
+          <button class="an-tab" onclick="switchAnTab(this,'top')">Top Produtos</button>
+        </div>
+        <div id="anTab-overview">
+          <div class="an-charts-grid">
+            <div class="an-chart-card"><div class="an-chart-title">Distribuição de Comissão<span class="an-chart-hint">clique nas fatias</span></div><div class="chart-wrap"><canvas id="chartComm"></canvas></div></div>
+            <div class="an-chart-card"><div class="an-chart-title">Tipos de Loja</div><div class="chart-wrap"><canvas id="chartShop"></canvas></div></div>
+            <div class="an-chart-card wide"><div class="an-chart-title">Score de Oportunidade — distribuição</div><div class="chart-wrap"><canvas id="chartScore"></canvas></div></div>
+          </div>
+        </div>
+        <div id="anTab-scatter" style="display:none">
+          <div class="an-chart-card"><div class="an-chart-title">Score × Comissão Total<span class="an-chart-hint">passe o mouse para ver o produto</span></div><div class="chart-wrap tall"><canvas id="chartScatter"></canvas></div></div>
+        </div>
+        <div id="anTab-top" style="display:none">
+          <div class="an-chart-card"><div class="an-chart-title">Top 15 Produtos por Score de Oportunidade</div>
+            <table class="data-table"><thead><tr><th>#</th><th>Produto</th><th>Score</th><th>Comissão Total</th><th>Seller</th><th>Avaliação</th><th>Preço</th></tr></thead><tbody id="topTableBody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════
+   CONSTANTES
+   ══════════════════════════════════════════════════════════ */
+const API_URL         = '/api/shopee-proxy';  // proxy seguro
+const RATE_WINDOW_MS  = 60_000;
+const RATE_LIMIT_MAX  = 30;
+const MAX_FAVS        = 100;
+const MAX_HISTORY     = 30;
+const MAX_ALL_PRODS   = 500;
+const DEBOUNCE_MS     = 450;
+const PREFETCH_DELAY  = 1000;
+
+/* ═══════════════════════════════════════════════════════════
+   SEGURANÇA — escapeHtml
+   Todas as strings externas passam por aqui antes de ir ao DOM.
+   ══════════════════════════════════════════════════════════ */
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   localStorage SEGURO
+   ══════════════════════════════════════════════════════════ */
+const Store = {
+  get(key, fallback = null) {
+    try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
+    catch { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch(e) {
+      if (e.name === 'QuotaExceededError') {
+        try { localStorage.removeItem('sap_history'); localStorage.setItem(key, JSON.stringify(value)); } catch {}
+      }
+      return false;
+    }
+  },
+  remove(key) { try { localStorage.removeItem(key); } catch {} }
+};
+
+/* ═══════════════════════════════════════════════════════════
+   productMap — único repositório de objetos produto
+   Elimina serialização de objetos em atributos onclick.
+   ══════════════════════════════════════════════════════════ */
+const productMap = new Map(); // itemId(string) → produto
+
+function registerProducts(products) {
+  products.forEach(p => productMap.set(String(p.itemId), p));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════════ */
+const state = {
+  connected    : false,
+  loading      : false,
+  page         : 1,
+  hasNext      : false,
+  products     : [],
+  favorites    : Store.get('sap_favs', []),
+  history      : Store.get('sap_history', []),
+  allProducts  : [],
+  allProductIds: new Set(),          // O(1) dedup para analytics (Fix O(n²))
+  reqTimestamps: [],                 // sliding window rate limit
+  currentView  : 'pg-4',
+  currentPage  : 'search',
+};
+
+/* ═══════════════════════════════════════════════════════════
+   SCORING — memoizado em p._score
+   Calculado uma vez por produto; nunca recalculado.
+   ══════════════════════════════════════════════════════════ */
+function scoreProduct(p) {
+  if (p._score != null) return p._score;
+  let s = 0;
+  const comm   = parseFloat(p.commissionRate || 0) * 100;
+  const seller = parseFloat(p.sellerCommissionRate || 0) * 100;
+  const rating = parseFloat(p.ratingStar || 0);
+  const sales  = parseInt(p.sales || 0, 10);
+  const disc   = parseFloat(p.priceDiscountRate || 0) * 100;
+  const recent = p.periodStartTime && (Date.now()/1000 - p.periodStartTime) < 30*86400;
+  s += Math.min(comm   / 20 * 50, 50);
+  s += Math.min(seller / 10 * 15, 15);
+  s += (rating / 5) * 15;
+  if (recent) s += 10;
+  s += Math.min(disc / 50 * 10, 10);
+  if (sales > 0 && sales < 5000) s += Math.min(sales / 5000 * 5, 5);
+  p._score = Math.round(Math.min(s, 100));
+  return p._score;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MÉTRICAS DE DISPUTA E VELOCIDADE
+   ══════════════════════════════════════════════════════════
+
+   salesVelocity: vendas por dia desde que o produto entrou no
+   programa de afiliados. Produtos com alta velocidade e poucos
+   dias no programa são "campeões emergentes" — vendem muito mas
+   ainda têm poucos afiliados divulgando.
+
+   disputeIndex: estimativa inversa de disputa (0–100).
+   Quanto maior, MENOS concorrência de afiliados.
+   Fórmula: produtos recentes + alta velocidade de vendas =
+   alto potencial, baixa saturação.
+
+   scoreGoldHidden: score composto "joias escondidas" —
+   combina comissão, velocidade de vendas e baixa disputa.
+   Usado no preset dedicado.
+   ══════════════════════════════════════════════════════════ */
+function salesVelocity(p) {
+  if (p._velocity != null) return p._velocity;
+  const sales = parseInt(p.sales || 0, 10);
+  if (!sales || !p.periodStartTime) { p._velocity = 0; return 0; }
+  const daysInProgram = Math.max((Date.now()/1000 - p.periodStartTime) / 86400, 1);
+  p._velocity = sales / daysInProgram; // vendas por dia
+  return p._velocity;
+}
+
+function disputeIndex(p) {
+  // Estimativa de BAIXA disputa (quanto maior = menos afiliados concorrentes)
+  // Lógica: produto recente com muitas vendas = ainda poucos afiliados o encontraram
+  if (p._dispute != null) return p._dispute;
+  const vel       = salesVelocity(p);
+  const daysIn    = p.periodStartTime ? Math.max((Date.now()/1000 - p.periodStartTime) / 86400, 1) : 999;
+  const sales     = parseInt(p.sales || 0, 10);
+
+  let score = 0;
+  // Produto recente (< 15 dias): máxima chance de baixa disputa
+  if (daysIn <= 15)  score += 40;
+  else if (daysIn <= 30) score += 25;
+  else if (daysIn <= 60) score += 10;
+
+  // Alta velocidade de vendas = produto quente mas potencialmente ainda descoberto
+  if (vel >= 100)  score += 30;
+  else if (vel >= 30) score += 20;
+  else if (vel >= 10) score += 10;
+  else if (vel >= 1)  score += 5;
+
+  // Volume absoluto de vendas: prova que o produto converte
+  if (sales >= 10000)      score += 20;
+  else if (sales >= 3000)  score += 15;
+  else if (sales >= 1000)  score += 10;
+  else if (sales >= 300)   score += 5;
+
+  // Bônus: seller comissão extra (poucos afiliados ativaram isso ainda)
+  if (parseFloat(p.sellerCommissionRate || 0) > 0) score += 10;
+
+  p._dispute = Math.min(score, 100);
+  return p._dispute;
+}
+
+function scoreGoldHidden(p) {
+  // Score composto para "joias escondidas": baixa disputa + campeão de vendas
+  if (p._goldScore != null) return p._goldScore;
+  const comm    = parseFloat(p.commissionRate || 0) * 100;
+  const dispute = disputeIndex(p);
+  const vel     = salesVelocity(p);
+  const rating  = parseFloat(p.ratingStar || 0);
+
+  let s = 0;
+  s += Math.min(dispute, 100) * 0.40;          // 40% peso: baixa disputa
+  s += Math.min(vel / 50 * 100, 100) * 0.30;   // 30% peso: velocidade de vendas
+  s += Math.min(comm / 20 * 100, 100) * 0.20;  // 20% peso: comissão
+  s += (rating / 5) * 100 * 0.10;              // 10% peso: avaliação (prova social)
+
+  p._goldScore = Math.round(Math.min(s, 100));
+  return p._goldScore;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILTROS CLIENT-SIDE — função única (Fix código duplicado)
+   Chamada tanto em search() quanto em changePage() via cache.
+   ══════════════════════════════════════════════════════════ */
+function applyClientFilters(products) {
+  const minComm    = parseFloat(document.getElementById('fMinComm').value)     || 0;
+  const minRat     = parseFloat(document.getElementById('fMinRating').value)   || 0;
+  const minScore   = parseFloat(document.getElementById('fMinScore').value)    || 0;
+  const minVel     = parseFloat(document.getElementById('fMinVelocity').value) || 0;
+  const minDispute = parseFloat(document.getElementById('fMinDispute').value)  || 0;
+  const shopF      = document.getElementById('fShopType').value;
+  let out = products;
+  if (minComm    > 0) out = out.filter(p => parseFloat(p.commissionRate||0)*100 >= minComm);
+  if (minRat     > 0) out = out.filter(p => parseFloat(p.ratingStar||0) >= minRat);
+  if (minScore   > 0) out = out.filter(p => scoreProduct(p) >= minScore);
+  if (minVel     > 0) out = out.filter(p => salesVelocity(p) >= minVel);
+  if (minDispute > 0) out = out.filter(p => disputeIndex(p) >= minDispute);
+  if (shopF === 'mall')     out = out.filter(p => p.shopType === 1);
+  if (shopF === 'star')     out = out.filter(p => p.shopType === 2);
+  if (shopF === 'starplus') out = out.filter(p => p.shopType === 4);
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   addToAllProducts — O(1) dedup via Set
+   (Fix O(n²) do .some() anterior)
+   ══════════════════════════════════════════════════════════ */
+function addToAllProducts(products) {
+  for (const p of products) {
+    const id = String(p.itemId);
+    if (!state.allProductIds.has(id)) {
+      state.allProductIds.add(id);
+      state.allProducts.push(p);
+    }
+  }
+  if (state.allProducts.length > MAX_ALL_PRODS) {
+    const removed = state.allProducts.splice(0, state.allProducts.length - MAX_ALL_PRODS);
+    removed.forEach(p => state.allProductIds.delete(String(p.itemId)));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROXY FETCH — toda comunicação passa pelo Netlify Function
+   O Secret fica em variável de ambiente no servidor Netlify.
+   O frontend só envia: { appId, query, variables? }
+   O proxy assina com SHA256 e repassa para a Shopee.
+   ══════════════════════════════════════════════════════════ */
+async function proxyFetch(queryStr, variables, signal = null) {
+  const appId = getAppId();
+  if (!appId) throw new Error('App ID é obrigatório.');
+
+  const body = JSON.stringify(
+    variables ? { appId, query: queryStr, variables }
+              : { appId, query: queryStr }
+  );
+
+  const opts = {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  };
+  if (signal) opts.signal = signal;
+
+  const resp = await fetch(API_URL, opts);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+  return resp.json();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RATE LIMIT — sliding window real
+   ══════════════════════════════════════════════════════════ */
+function rateLimitPurge() {
+  const cutoff = Date.now() - RATE_WINDOW_MS;
+  state.reqTimestamps = state.reqTimestamps.filter(t => t > cutoff);
+}
+function rateLimitCount()  { rateLimitPurge(); return state.reqTimestamps.length; }
+function rateLimitAdd()    { state.reqTimestamps.push(Date.now()); updateRateBar(); }
+function rateLimitWaitMs() { rateLimitPurge(); return state.reqTimestamps.length ? RATE_WINDOW_MS - (Date.now() - state.reqTimestamps[0]) : 0; }
+
+function updateRateBar() {
+  const n   = rateLimitCount();
+  const pct = Math.min((n / RATE_LIMIT_MAX) * 100, 100);
+  const fill = document.getElementById('rateFill');
+  fill.style.width      = pct + '%';
+  fill.style.background = pct > 80 ? 'var(--red)' : pct > 50 ? 'var(--yellow)' : 'var(--green)';
+  document.getElementById('rateText').textContent = `${n}/${RATE_LIMIT_MAX}`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   API — doFetch centralizado (prefetch também passa aqui)
+   ══════════════════════════════════════════════════════════ */
+const API_ERRORS = {
+  10020: 'Assinatura inválida. Verifique App ID e Secret.',
+  10035: 'Sem acesso à API. Solicite ativação no painel Shopee.',
+  10030: 'Rate limit atingido pelo servidor. Aguarde.',
+  11001: 'Parâmetros inválidos na query.',
+};
+
+async function doFetch(queryStr, variables = null) {
+  if (rateLimitCount() >= RATE_LIMIT_MAX) {
+    throw new Error(`Rate limit local. Aguarde ${Math.ceil(rateLimitWaitMs()/1000)}s.`);
+  }
+  rateLimitAdd();
+  const json = await proxyFetch(queryStr, variables);
+  if (json.errors) {
+    const code = json.errors[0]?.extensions?.code;
+    const msg  = json.errors[0]?.message || 'Erro desconhecido';
+    throw new Error(API_ERRORS[code] || `API Error ${code}: ${msg}`);
+  }
+  return json.data;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   buildQuery — recebe parâmetros explícitos; não lê o DOM
+   Isso permite testes unitários e uso pelo prefetch sem
+   acoplar à estrutura da página.
+   ══════════════════════════════════════════════════════════ */
+function readFilterParams() {
+  return {
+    listType : document.getElementById('fListType').value,
+    sortType : document.getElementById('fSortType').value,
+    limit    : document.getElementById('fLimit').value,
+    keySeller: document.getElementById('fKeySeller').value,
+    ams      : document.getElementById('fAms').value,
+    keyword  : document.getElementById('fKeyword').value.trim(),
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   buildQuery — dois modos de keyword, fallback automático
+   ══════════════════════════════════════════════════════════
+   A API Shopee Open API deveria suportar variáveis GraphQL
+   (padrão da spec). Porém algumas instâncias aceitam só
+   interpolação direta na string da query.
+
+   Estratégia: tenta variáveis primeiro (mais seguro).
+   Se retornar erro 11001, `_useGQLVars` vira false e
+   todas as requisições seguintes usam interpolação segura.
+   A keyword é sanitizada antes de interpolar: remove
+   aspas, barras e caracteres que poderiam malformar a query.
+   ══════════════════════════════════════════════════════════ */
+let _useGQLVars = true; // começa tentando variáveis GraphQL
+
+function sanitizeKeyword(kw) {
+  // Remove qualquer char que possa fechar ou injetar na string GraphQL
+  return kw.replace(/["\\\n\r{}()]/g, '').trim().substring(0, 100);
+}
+
+function buildQuery(page, params) {
+  const { listType, sortType, limit, keySeller, ams } = params;
+  const args = [
+    `listType: ${parseInt(listType, 10)}`,
+    `sortType: ${parseInt(sortType, 10)}`,
+    `limit:    ${parseInt(limit,    10)}`,
+    `page:     ${parseInt(page,     10)}`,
+  ];
+  if (keySeller) args.push('isKeySeller: true');
+  if (ams)       args.push('isAMSOffer: true');
+
+  const hasKw = !!params.keyword;
+
+  if (hasKw && _useGQLVars) {
+    // Modo 1: variáveis GraphQL (mais seguro — keyword nunca entra na string da query)
+    args.push('keyword: $kw');
+    return {
+      query: `query Search($kw: String) {
+        productOfferV2(${args.join(', ')}) {
+          nodes {
+            itemId productName productLink offerLink imageUrl
+            priceMin priceMax priceDiscountRate sales ratingStar
+            commissionRate sellerCommissionRate shopeeCommissionRate commission
+            shopId shopName shopType periodStartTime periodEndTime
+          }
+          pageInfo { page limit hasNextPage }
+        }
+      }`,
+      variables: { kw: params.keyword },
+    };
+  }
+
+  // Modo 2: interpolação direta (fallback ou sem keyword)
+  // keyword sanitizada: remove chars que poderiam quebrar a string GraphQL
+  if (hasKw) args.push(`keyword: "${sanitizeKeyword(params.keyword)}"`);
+  return {
+    query: `{
+      productOfferV2(${args.join(', ')}) {
+        nodes {
+          itemId productName productLink offerLink imageUrl
+          priceMin priceMax priceDiscountRate sales ratingStar
+          commissionRate sellerCommissionRate shopeeCommissionRate commission
+          shopId shopName shopType periodStartTime periodEndTime
+        }
+        pageInfo { page limit hasNextPage }
+      }
+    }`,
+    variables: undefined,
+  };
+}
+
+/* Chamado pelo tratamento de erro quando a API retorna 11001 com keyword.
+   Desativa variáveis GraphQL para toda a sessão e repete a requisição. */
+async function retryWithInterpolation(page, params, signal = null) {
+  _useGQLVars = false;
+  toast('API não suporta variáveis GraphQL — usando modo compatível.', 'info');
+  const { query } = buildQuery(page, params);
+  const json = await proxyFetch(query, null, signal);
+  if (json.errors) {
+    const code = json.errors[0]?.extensions?.code;
+    throw new Error(API_ERRORS[code] || json.errors[0]?.message || 'Erro desconhecido');
+  }
+  return json.data;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONNECT
+   ══════════════════════════════════════════════════════════ */
+function setConnected(ok, msg = '') {
+  state.connected = ok;
+  document.getElementById('connDot').className   = 'dot ' + (ok ? 'online' : 'offline');
+  document.getElementById('connText').textContent = ok ? 'API conectada ✓' : (msg || 'Desconectado');
+  document.getElementById('btnSearch').disabled  = !ok;
+  document.getElementById('btnExport').disabled  = !ok;
+  document.getElementById('btnSweep').disabled   = !ok;
+}
+
+async function connect() {
+  const appId = getAppId();
+  if (!appId) { toast('Preencha o App ID.', 'error'); return; }
+  saveCredsToSession();
+  const btn = document.getElementById('btnConnect');
+  btn.disabled = true; btn.textContent = 'Conectando…';
+  try {
+    const { query } = buildQuery(1, { listType:'1', sortType:'5', limit:'1', keySeller:'', ams:'', keyword:'' });
+    await doFetch(query);
+    setConnected(true);
+    toast('Conectado à API Shopee! ✓', 'success');
+    await search();
+  } catch(e) {
+    setConnected(false, e.message.substring(0,42));
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Conectar à API';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRÉ-CARREGAMENTO — prefetch da próxima página
+   ══════════════════════════════════════════════════════════ */
+const prefetchCache = new Map(); // page(num) → { nodes, hasNext }
+let   prefetchAbort = null;
+
+function prefetchBarState(phase) {
+  document.getElementById('prefetchBar').className = 'prefetch-bar ' + phase;
+}
+
+async function prefetchNextPage(currentPage, params) {
+  const next = currentPage + 1;
+  if (!state.hasNext || prefetchCache.has(next)) return;
+
+  if (prefetchAbort) prefetchAbort.abort();
+  prefetchAbort = new AbortController();
+  const signal = prefetchAbort.signal;
+
+  prefetchBarState('loading');
+  document.getElementById('nextGhost').classList.add('visible');
+
+  try {
+    if (rateLimitCount() >= RATE_LIMIT_MAX) return;
+    rateLimitAdd();
+
+    const { query, variables } = buildQuery(next, params);
+    const json = await proxyFetch(query, variables, signal);
+    if (json.errors) throw new Error('prefetch api error');
+
+    const nodes  = json.data?.productOfferV2?.nodes || [];
+    const hasNxt = json.data?.productOfferV2?.pageInfo?.hasNextPage || false;
+
+    registerProducts(nodes);
+    nodes.forEach(p => scoreProduct(p));
+
+    prefetchCache.set(next, { nodes, hasNext: hasNxt });
+    prefetchBarState('done');
+    setTimeout(() => prefetchBarState('hide'), 400);
+  } catch(e) {
+    if (e.name !== 'AbortError') prefetchBarState('hide');
+  } finally {
+    document.getElementById('nextGhost').classList.remove('visible');
+    prefetchAbort = null;
+  }
+}
+
+function invalidatePrefetchCache() {
+  prefetchCache.clear();
+  if (prefetchAbort) { prefetchAbort.abort(); prefetchAbort = null; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VARREDURA MULTI-PÁGINA
+   ══════════════════════════════════════════════════════════
+   Busca N páginas em sequência com delay entre requisições
+   para respeitar o rate limit, coleta todos os produtos,
+   aplica filtros client-side, rankeia pelo scoreGoldHidden
+   e exibe os top K melhores numa lista unificada.
+
+   Fluxo:
+   1. Busca página 1 (normal)
+   2. Para cada página seguinte com hasNext=true:
+      - Aguarda 2.1s (janela segura de rate limit: 30/min = 1 req/2s)
+      - Busca a página
+      - Atualiza barra de progresso
+   3. Consolida todos os produtos únicos
+   4. Aplica applyClientFilters()
+   5. Ordena por scoreGoldHidden desc
+   6. Exibe top N
+   ══════════════════════════════════════════════════════════ */
+
+const SWEEP_DELAY_MS = 2200; // ≈ 27 req/min — margem de segurança em relação ao limite de 30
+let _sweepAbort      = null;
+let _sweepActive     = false;
+
+function sweepUI(show) {
+  document.getElementById('sweepBar').classList.toggle('active', show);
+  document.getElementById('sweepModeBadge').classList.toggle('visible', show);
+  document.getElementById('btnSweep').disabled  = show;
+  document.getElementById('btnSearch').disabled = show;
+  if (!show) {
+    document.getElementById('sweepFill').style.width = '0%';
+    document.getElementById('sweepStats').classList.remove('visible');
+  }
+}
+
+function sweepProgress(current, total, collected, detail) {
+  const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+  document.getElementById('sweepFill').style.width    = pct + '%';
+  document.getElementById('sweepStatus').textContent  = `${current} / ${total}`;
+  document.getElementById('sweepDetail').textContent  = detail;
+  document.getElementById('sweepFound').textContent   = `${collected} produtos coletados`;
+}
+
+function cancelSweep() {
+  if (_sweepAbort) _sweepAbort.abort();
+  _sweepActive = false;
+  sweepUI(false);
+  toast('Varredura cancelada.', 'info');
+  state.loading = false;
+  document.getElementById('btnSearch').disabled = !state.connected;
+  document.getElementById('btnSweep').disabled  = !state.connected;
+}
+
+async function fetchPageRaw(pageNum, params, signal) {
+  if (rateLimitCount() >= RATE_LIMIT_MAX) {
+    const wait = Math.ceil(rateLimitWaitMs() / 1000);
+    throw new Error(`Rate limit atingido. Aguarde ${wait}s e tente novamente.`);
+  }
+  rateLimitAdd();
+
+  const { query, variables } = buildQuery(pageNum, params);
+  const json = await proxyFetch(query, variables, signal);
+  if (json.errors) {
+    const code = json.errors[0]?.extensions?.code;
+    if (code === 11001 && params.keyword && _useGQLVars) {
+      const data2 = await retryWithInterpolation(pageNum, params, signal);
+      return {
+        nodes  : data2?.productOfferV2?.nodes   || [],
+        hasNext: data2?.productOfferV2?.pageInfo?.hasNextPage || false,
+      };
+    }
+    throw new Error(API_ERRORS[code] || json.errors[0]?.message || 'Erro API');
+  }
+  return {
+    nodes  : json.data?.productOfferV2?.nodes   || [],
+    hasNext: json.data?.productOfferV2?.pageInfo?.hasNextPage || false,
+  };
+}
+
+async function startSweep() {
+  if (!state.connected) { toast('Conecte à API primeiro.', 'error'); return; }
+  if (_sweepActive || state.loading) return;
+
+  const maxPages = parseInt(document.getElementById('fSweepPages').value, 10);
+  const topN     = parseInt(document.getElementById('fSweepTop').value,   10);
+  const params   = readFilterParams();
+
+  _sweepActive = true;
+  state.loading = true;
+  _sweepAbort  = new AbortController();
+  const signal = _sweepAbort.signal;
+
+  invalidatePrefetchCache();
+  sweepUI(true);
+  hideErrorBox();
+  document.getElementById('statsBar').style.display   = 'none';
+  document.getElementById('resultsBar').style.display = 'none';
+  document.getElementById('pagination').style.display = 'none';
+  document.getElementById('initialState').style.display = 'none';
+  showSkeletons();
+  updateActiveTags();
+
+  const allNodes = new Map(); // itemId → produto (dedup automático)
+  let pagesScanned = 0;
+  let hasNext = true;
+
+  try {
+    for (let pg = 1; pg <= maxPages && hasNext && _sweepActive; pg++) {
+      sweepProgress(pg - 1, maxPages, allNodes.size, `Buscando página ${pg} de ${maxPages}…`);
+
+      // Delay entre páginas (não na primeira)
+      if (pg > 1) {
+        await new Promise(resolve => {
+          const t = setTimeout(resolve, SWEEP_DELAY_MS);
+          signal.addEventListener('abort', () => { clearTimeout(t); resolve(); }, { once: true });
+        });
+        if (!_sweepActive) break;
+      }
+
+      const { nodes, hasNext: hn } = await fetchPageRaw(pg, params, signal);
+      hasNext = hn;
+      pagesScanned++;
+
+      // Registra no productMap e calcula scores enquanto espera o próximo delay
+      registerProducts(nodes);
+      nodes.forEach(p => {
+        scoreProduct(p);
+        salesVelocity(p);
+        disputeIndex(p);
+        scoreGoldHidden(p);
+        allNodes.set(String(p.itemId), p);
+      });
+      addToAllProducts(nodes);
+
+      sweepProgress(pg, maxPages, allNodes.size, `Página ${pg} concluída — ${nodes.length} produtos`);
+    }
+  } catch(e) {
+    if (e.name === 'AbortError') {
+      // cancelamento — já tratado em cancelSweep()
+      return;
+    }
+    sweepUI(false);
+    showErrorBox(e.message);
+    showEmptyState('❌', 'Erro na varredura', esc(e.message));
+    state.loading = false;
+    _sweepActive  = false;
+    document.getElementById('btnSearch').disabled = !state.connected;
+    document.getElementById('btnSweep').disabled  = !state.connected;
+    return;
+  }
+
+  if (!_sweepActive) return; // cancelado durante a varredura
+
+  // Consolidação: filtra → ordena por goldScore desc → top N
+  const allArr   = Array.from(allNodes.values());
+  const filtered = applyClientFilters(allArr);
+  const sorted   = filtered.sort((a, b) => scoreGoldHidden(b) - scoreGoldHidden(a));
+  const topList  = sorted.slice(0, topN);
+
+  // Atualiza state
+  state.products = topList;
+  state.hasNext  = false; // varredura não tem paginação — resultado já está rankeado
+  state.page     = 1;
+
+  // Renderiza
+  document.getElementById('productsGrid').innerHTML = '';
+  renderProducts(topList);
+
+  // Stats da varredura
+  sweepUI(false);
+  const swStats = document.getElementById('sweepStats');
+  swStats.classList.add('visible');
+  const topGold = topList[0] ? scoreGoldHidden(topList[0]) : 0;
+  document.getElementById('swPages').textContent    = pagesScanned;
+  document.getElementById('swPagesSub').textContent = `de ${maxPages} solicitadas`;
+  document.getElementById('swTotal').textContent    = allArr.length;
+  document.getElementById('swTopGold').textContent  = topGold;
+  document.getElementById('swTopGoldProd').textContent =
+    (topList[0]?.productName || '').substring(0, 24) + (topList[0]?.productName?.length > 24 ? '…' : '');
+  document.getElementById('swShowing').textContent  = topList.length;
+
+  // Resumo em toast
+  const removed = allArr.length - filtered.length;
+  toast(`✅ Varredura concluída — ${pagesScanned} páginas, ${allArr.length} produtos, top ${topList.length} exibidos${removed > 0 ? `, ${removed} filtrados` : ''}.`, 'success');
+
+  updateNavBadge(topList.length);
+  saveHistory(1, params);
+
+  _sweepActive  = false;
+  state.loading = false;
+  document.getElementById('btnSearch').disabled = !state.connected;
+  document.getElementById('btnSweep').disabled  = !state.connected;
+  document.getElementById('btnExport').disabled = !state.connected;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH
+   ══════════════════════════════════════════════════════════ */
+async function search(page = 1) {
+  if (!state.connected) { toast('Conecte à API primeiro.', 'error'); return; }
+  if (state.loading) return;
+  state.loading = true;
+  state.page = page;
+
+  hideErrorBox();
+  document.getElementById('statsBar').style.display   = 'none';
+  document.getElementById('resultsBar').style.display = 'none';
+  document.getElementById('pagination').style.display = 'none';
+  document.getElementById('initialState').style.display = 'none';
+  showSkeletons();
+  updateActiveTags();
+
+  const params = readFilterParams();
+
+  try {
+    const { query, variables } = buildQuery(page, params);
+    rateLimitAdd();
+    const json = await proxyFetch(query, variables);
+    if (json.errors) {
+      const code = json.errors[0]?.extensions?.code;
+      if (code === 11001 && params.keyword && _useGQLVars) {
+        const data = await retryWithInterpolation(page, params);
+        const result2 = data.productOfferV2;
+        const raw2    = result2.nodes || [];
+        registerProducts(raw2); addToAllProducts(raw2);
+        const filtered2 = applyClientFilters(raw2);
+        state.products = filtered2; state.hasNext = result2.pageInfo?.hasNextPage || false;
+        renderProducts(filtered2); renderStats(filtered2); updateNavBadge(filtered2.length);
+        saveHistory(page, params);
+        if (filtered2.length && (state.hasNext || page > 1)) {
+          document.getElementById('pgPrev').disabled     = page <= 1;
+          document.getElementById('pgNext').disabled     = !state.hasNext;
+          document.getElementById('pgNum').textContent   = page;
+          document.getElementById('pagination').style.display = 'flex';
+        }
+        if (state.hasNext) setTimeout(() => prefetchNextPage(page, params), PREFETCH_DELAY);
+        return;
+      }
+      throw new Error(API_ERRORS[code] || json.errors[0]?.message || 'Erro desconhecido');
+    }
+    const result = json.data.productOfferV2;
+    const raw    = result.nodes || [];
+
+    registerProducts(raw);
+    addToAllProducts(raw);
+
+    const filtered = applyClientFilters(raw); // Fix: função única, sem duplicação
+    const removed  = raw.length - filtered.length;
+    if (removed > 0) toast(`${removed} produto(s) ocultados pelos filtros ativos.`, 'info');
+
+    state.products = filtered;
+    state.hasNext  = result.pageInfo?.hasNextPage || false;
+
+    renderProducts(filtered);
+    renderStats(filtered);
+    updateNavBadge(filtered.length);
+    saveHistory(page, params);
+
+    if (filtered.length && (state.hasNext || page > 1)) {
+      document.getElementById('pgPrev').disabled     = page <= 1;
+      document.getElementById('pgNext').disabled     = !state.hasNext;
+      document.getElementById('pgNum').textContent   = page;
+      document.getElementById('pagination').style.display = 'flex';
+    }
+
+    // Pré-carrega próxima página em background
+    if (state.hasNext) setTimeout(() => prefetchNextPage(page, params), PREFETCH_DELAY);
+
+  } catch(e) {
+    setConnected(false, e.message.substring(0,42));
+    showErrorBox(e.message);
+    document.getElementById('productsGrid').innerHTML = '';
+    showEmptyState('❌', 'Erro na requisição', esc(e.message));
+  } finally {
+    state.loading = false;
+  }
+}
+
+async function changePage(dir) {
+  const next = state.page + dir;
+  if (next < 1 || (dir === 1 && !state.hasNext)) return;
+
+  if (dir === 1 && prefetchCache.has(next)) {
+    const cached = prefetchCache.get(next);
+    prefetchCache.delete(next);
+
+    registerProducts(cached.nodes);
+    addToAllProducts(cached.nodes);
+
+    const filtered = applyClientFilters(cached.nodes); // Fix: mesma função
+    const removed  = cached.nodes.length - filtered.length;
+    if (removed > 0) toast(`${removed} produto(s) ocultados pelos filtros.`, 'info');
+
+    state.page     = next;
+    state.products = filtered;
+    state.hasNext  = cached.hasNext;
+
+    renderProducts(filtered);
+    renderStats(filtered);
+    updateNavBadge(filtered.length);
+    saveHistory(next, readFilterParams());
+
+    document.getElementById('pgPrev').disabled     = next <= 1;
+    document.getElementById('pgNext').disabled     = !state.hasNext;
+    document.getElementById('pgNum').textContent   = next;
+    document.getElementById('pagination').style.display = 'flex';
+    document.getElementById('statsBar').style.display   = 'grid';
+    document.getElementById('resultsBar').style.display = 'flex';
+
+    window.scrollTo({ top:0, behavior:'smooth' });
+    toast('⚡ Carregado do cache — instantâneo!', 'success');
+
+    if (state.hasNext) setTimeout(() => prefetchNextPage(next, readFilterParams()), 800);
+    return;
+  }
+
+  search(next);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════════════════════ */
+function showSkeletons() {
+  const g = document.getElementById('productsGrid');
+  g.innerHTML = Array(8).fill(0).map(() => `
+    <div class="skel-card">
+      <div class="skeleton skel-img"></div>
+      <div class="skel-body">
+        <div class="skeleton skel-line" style="width:55%;margin-bottom:8px"></div>
+        <div class="skeleton skel-line" style="width:90%;margin-bottom:8px"></div>
+        <div class="skeleton skel-line" style="width:70%"></div>
+      </div>
+    </div>`).join('');
+}
+
+function showEmptyState(icon, title, desc) {
+  const el = document.getElementById('initialState');
+  el.innerHTML = `<div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-desc">${desc}</div>`;
+  el.style.display = 'block';
+}
+
+function renderProducts(products) {
+  const g = document.getElementById('productsGrid');
+  if (!products.length) {
+    g.innerHTML = '';
+    showEmptyState('🔍','Nenhum produto encontrado','Tente ajustar os filtros ou remover a palavra-chave.');
+    return;
+  }
+  document.getElementById('initialState').style.display = 'none';
+  document.getElementById('resultsBar').style.display   = 'flex';
+  document.getElementById('rCount').textContent = products.length + (state.hasNext ? '+' : '');
+  g.innerHTML = products.map(p => renderCard(p)).join('');
+  if (state.currentView === 'pg-list') g.querySelectorAll('.pcard').forEach(c => c.classList.add('list-v'));
+}
+
+function renderCard(p) {
+  const comm   = parseFloat(p.commissionRate||0)*100;
+  const selC   = parseFloat(p.sellerCommissionRate||0)*100;
+  const score  = scoreProduct(p);
+  const isFav  = state.favorites.some(f => f.itemId === p.itemId);
+  const recent = p.periodStartTime && (Date.now()/1000 - p.periodStartTime) < 30*86400;
+  const hot    = comm >= 12;
+  const sType  = {1:'Mall',2:'Star',4:'Star+'}[p.shopType] || '';
+  const sClass = {1:'chip-mall',2:'chip-star',4:'chip-sp'}[p.shopType] || '';
+  const cClass = comm >= 10 ? 'high' : comm >= 5 ? 'mid' : 'low';
+  const sColor = score >= 70 ? 'var(--green)' : score >= 45 ? 'var(--yellow)' : 'var(--muted)';
+  const price  = p.priceMin ? 'R$ '+(p.priceMin/100000).toFixed(2).replace('.',',') : '—';
+  const pid    = esc(String(p.itemId));
+
+  // Todas as strings da API são escapadas antes de entrar no HTML
+  const safeName = esc(p.productName);
+  const safeShop = esc(p.shopName || 'Loja Shopee');
+  const safeImg  = esc(p.imageUrl || '');
+  const safeLink = esc(p.offerLink || p.productLink || '#');
+
+  const goldScore = scoreGoldHidden(p);
+  const isGold    = goldScore >= 60;
+
+  return `
+  <div class="pcard${isFav?' favorited':''}" id="card-${pid}">
+    <div class="badge-row">
+      ${recent?'<span class="badge badge-new">🆕 Recente</span>':''}
+      ${hot?'<span class="badge badge-hot">🔥 Hot</span>':''}
+      ${isGold?'<span class="badge badge-gold">🏆 Top Vendas</span>':''}
+      ${selC>0&&!isGold?'<span class="badge badge-seller">+Seller</span>':''}
+    </div>
+    <button class="fav-btn${isFav?' on':''}" onclick="toggleFav('${pid}')" aria-label="Favoritar">⭐</button>
+    <div class="card-img-wrap">
+      ${safeImg?`<img class="card-img" src="${safeImg}" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<div class=\\'card-img-ph\\'>🛍️</div>'">`:'<div class="card-img-ph">🛍️</div>'}
+      <div class="comm-overlay ${cClass}">${formatComm(p.commissionRate)}</div>
+    </div>
+    <div class="card-body">
+      <div class="card-shop-row">
+        <div class="shop-name">${safeShop}</div>
+        ${sType?`<span class="shop-chip ${sClass}">${sType}</span>`:''}
+      </div>
+      <div class="card-name">${safeName||'—'}</div>
+      <div class="mini-metrics">
+        <div class="mm"><div class="mm-lbl">Total Comm.</div><div class="mm-val" style="color:${comm>=10?'var(--green)':comm>=5?'var(--yellow)':'var(--orange)'}">${formatComm(p.commissionRate)}</div></div>
+        <div class="mm"><div class="mm-lbl">Seller</div><div class="mm-val" style="color:var(--yellow)">${formatComm(p.sellerCommissionRate)}</div></div>
+        <div class="mm"><div class="mm-lbl">Velocidade</div><div class="mm-val" style="color:var(--blue)">${salesVelocity(p)>=1?salesVelocity(p).toFixed(1)+'/dia':'—'}</div></div>
+        <div class="mm"><div class="mm-lbl">Baixa Disputa</div><div class="mm-val" style="color:${disputeIndex(p)>=60?'var(--green)':disputeIndex(p)>=35?'var(--yellow)':'var(--muted)'}">${disputeIndex(p)}</div></div>
+      </div>
+      <div class="price-row">
+        <div class="c-price">${price}</div>
+        ${p.ratingStar?`<div class="c-stars">★<span>${parseFloat(p.ratingStar).toFixed(1)}</span></div>`:''}
+      </div>
+      <div class="score-row">
+        <div class="score-lbl-row">
+          <span class="score-lbl">${isGold?'Joia Escondida':'Oportunidade'}</span>
+          <span class="score-val" style="color:${isGold?'var(--yellow)':sColor}">${isGold?goldScore:score}/100</span>
+        </div>
+        <div class="score-track"><div class="score-fill" style="width:${isGold?goldScore:score}%;background:${isGold?'var(--yellow)':sColor}"></div></div>
+      </div>
+      <div class="card-actions">
+        <button class="act-btn act-copy" onclick="copyLink(this,'${safeLink}')">📋 Copiar</button>
+        <button class="act-btn act-detail" onclick="openDetail('${pid}')" aria-label="Detalhes">🔍</button>
+        <a class="act-btn act-open" href="${safeLink}" target="_blank" rel="noopener noreferrer">🛒 Ver</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderStats(products) {
+  if (!products.length) return;
+  const comms  = products.map(p => parseFloat(p.commissionRate||0)*100);
+  const scores = products.map(p => scoreProduct(p));
+  const topI   = comms.indexOf(Math.max(...comms));
+  document.getElementById('sTotal').textContent    = products.length + (state.hasNext?'+':'');
+  document.getElementById('sTotalSub').textContent = `Página ${state.page}`;
+  document.getElementById('sTopComm').textContent  =   Math.max(...comms).toFixed(1)+'%';
+  document.getElementById('sTopProd').textContent  = (products[topI]?.productName||'').substring(0,22)+'…';
+  document.getElementById('sAvgComm').textContent  = (comms.reduce((a,b)=>a+b,0)/comms.length).toFixed(1)+'%';
+  document.getElementById('sScore').textContent    = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+  document.getElementById('statsBar').style.display = 'grid';
+}
+
+/* VIEW TOGGLE */
+function setView(v) {
+  state.currentView = v;
+  const g = document.getElementById('productsGrid');
+  g.className = 'products-grid ' + v;
+  ['vg4','vg2','vlist'].forEach(id => document.getElementById(id).classList.remove('active'));
+  if (v==='pg-4')   document.getElementById('vg4').classList.add('active');
+  if (v==='pg-2')   document.getElementById('vg2').classList.add('active');
+  if (v==='pg-list'){ document.getElementById('vlist').classList.add('active'); g.querySelectorAll('.pcard').forEach(c=>c.classList.add('list-v')); }
+}
+
+/* DETAIL MODAL */
+let _modalPid = null;
+function openDetail(pid) {
+  const p = productMap.get(String(pid));
+  if (!p) return;
+  _modalPid = String(pid);
+  document.getElementById('mImg').src          = esc(p.imageUrl||'');
+  document.getElementById('mName').textContent  = p.productName||'—';
+  document.getElementById('mShop').textContent  = (p.shopName||'—')+(p.shopType?' · '+({1:'Mall',2:'Star',4:'Star+'}[p.shopType]||''):'');
+  document.getElementById('mCTotal').textContent  = formatComm(p.commissionRate);
+  document.getElementById('mCShopee').textContent = formatComm(p.shopeeCommissionRate);
+  document.getElementById('mCSeller').textContent = formatComm(p.sellerCommissionRate);
+  document.getElementById('mPMin').textContent    = p.priceMin?'R$'+(p.priceMin/100000).toFixed(2).replace('.',','):'—';
+  document.getElementById('mPMax').textContent    = p.priceMax?'R$'+(p.priceMax/100000).toFixed(2).replace('.',','):'—';
+  document.getElementById('mSales').textContent   = p.sales||'—';
+  document.getElementById('mRating').textContent  = p.ratingStar?'★ '+parseFloat(p.ratingStar).toFixed(1):'—';
+  document.getElementById('mDiscount').textContent= p.priceDiscountRate?(parseFloat(p.priceDiscountRate)*100).toFixed(0)+'% OFF':'—';
+  document.getElementById('mShopType').textContent= {1:'Mall',2:'Star',4:'Star+'}[p.shopType]||'Padrão';
+  const score=scoreProduct(p), c=score>=70?'var(--green)':score>=45?'var(--yellow)':'var(--muted)';
+  document.getElementById('mScoreWrap').innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="font-family:'Space Mono',monospace;font-size:.68rem;color:var(--muted)">Pontuação</span>
+      <span style="font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;color:${c}">${score}/100</span>
+    </div>
+    <div style="height:6px;background:var(--s3);border-radius:100px">
+      <div style="height:100%;width:${score}%;background:${c};border-radius:100px;transition:width .5s .1s"></div>
+    </div>`;
+  document.getElementById('mOpenLink').href = esc(p.offerLink||p.productLink||'#');
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeModal(){ document.getElementById('detailModal').classList.remove('open'); _modalPid=null; }
+function modalCopy(){
+  const p=_modalPid?productMap.get(_modalPid):null; if(!p)return;
+  copyToClipboard(p.offerLink||p.productLink||'');
+  const btn=document.getElementById('mCopyBtn');
+  btn.textContent='✅ Copiado!'; btn.classList.add('done');
+  setTimeout(()=>{btn.textContent='📋 Copiar Link';btn.classList.remove('done');},2000);
+}
+document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))closeModal();});
+
+/* FAVORITES */
+function toggleFav(pid){
+  const p=productMap.get(String(pid)); if(!p)return;
+  const idx=state.favorites.findIndex(f=>f.itemId===p.itemId);
+  if(idx>=0){state.favorites.splice(idx,1);toast('Removido dos favoritos','info');}
+  else{
+    if(state.favorites.length>=MAX_FAVS){toast(`Limite de ${MAX_FAVS} favoritos atingido.`,'error');return;}
+    state.favorites.push({
+      itemId:p.itemId,productName:p.productName,shopName:p.shopName,
+      commissionRate:p.commissionRate,sellerCommissionRate:p.sellerCommissionRate,
+      shopeeCommissionRate:p.shopeeCommissionRate,commission:p.commission,
+      priceMin:p.priceMin,priceMax:p.priceMax,priceDiscountRate:p.priceDiscountRate,
+      ratingStar:p.ratingStar,sales:p.sales,imageUrl:p.imageUrl,
+      offerLink:p.offerLink,productLink:p.productLink,
+      shopType:p.shopType,periodStartTime:p.periodStartTime,
+    });
+    toast('Adicionado aos favoritos ⭐','success');
+  }
+  Store.set('sap_favs',state.favorites); updateFavCount();
+  const card=document.getElementById('card-'+pid);
+  if(card){const on=state.favorites.some(f=>f.itemId===p.itemId);card.classList.toggle('favorited',on);card.querySelector('.fav-btn')?.classList.toggle('on',on);}
+}
+function updateFavCount(){const n=state.favorites.length;document.getElementById('favCount').textContent=n;document.getElementById('favCountTop').textContent=n;}
+function renderFavorites(){
+  const g=document.getElementById('favsGrid'),e=document.getElementById('favEmpty');
+  if(!state.favorites.length){e.style.display='block';g.innerHTML='';return;}
+  e.style.display='none';
+  state.favorites.forEach(p=>productMap.set(String(p.itemId),p));
+  g.className='products-grid pg-4';
+  g.innerHTML=state.favorites.map(p=>renderCard(p)).join('');
+}
+
+/* HISTORY */
+function saveHistory(page,params){
+  const entry={id:Date.now(),keyword:params.keyword||'(todos)',listType:params.listType,page,count:state.products.length,ts:new Date().toLocaleString('pt-BR'),params};
+  state.history.unshift(entry);
+  if(state.history.length>MAX_HISTORY)state.history.pop();
+  Store.set('sap_history',state.history);
+}
+function renderHistory(){
+  const list=document.getElementById('historyList'),e=document.getElementById('histEmpty');
+  if(!state.history.length){e.style.display='block';list.innerHTML='';return;}
+  e.style.display='none';
+  list.innerHTML=state.history.map(h=>`
+    <div class="history-item" onclick="replayHistory(${h.id})">
+      <div class="h-icon">🔍</div>
+      <div class="h-body">
+        <div class="h-title">${h.keyword!=='(todos)'?'"'+esc(h.keyword)+'"':'Todos os produtos'}</div>
+        <div class="h-meta">${esc(String(h.listType))} · ${h.count} resultados${h.page>1?' · p.'+h.page:''}</div>
+      </div>
+      <div class="h-time">${esc(h.ts)}</div>
+      <button class="btn-sm" onclick="event.stopPropagation();replayHistory(${h.id})">Repetir →</button>
+    </div>`).join('');
+}
+function replayHistory(id){
+  const h=state.history.find(x=>x.id===id); if(!h||!h.params)return;
+  document.getElementById('fListType').value=h.params.listType;
+  document.getElementById('fSortType').value=h.params.sortType;
+  document.getElementById('fKeySeller').value=h.params.keySeller;
+  document.getElementById('fAms').value=h.params.ams;
+  document.getElementById('fKeyword').value=h.params.keyword||'';
+  invalidatePrefetchCache(); goPage('search');
+  if(state.connected)search(h.page);
+}
+
+/* ANALYTICS */
+const _charts={};
+function destroyChart(id){if(_charts[id]){_charts[id].destroy();delete _charts[id];}}
+Chart.defaults.color='#6E6B76';Chart.defaults.borderColor='rgba(255,255,255,0.06)';
+Chart.defaults.font.family="'Space Mono', monospace";Chart.defaults.font.size=11;
+const PAL={o:'rgba(255,87,34,.85)',oB:'rgba(255,87,34,.25)',g:'rgba(61,186,126,.85)',gB:'rgba(61,186,126,.25)',y:'rgba(245,166,35,.85)',yB:'rgba(245,166,35,.25)',b:'rgba(91,155,248,.85)',bB:'rgba(91,155,248,.25)',p:'rgba(155,109,255,.85)',pB:'rgba(155,109,255,.25)',m:'rgba(110,107,118,.6)'};
+
+function switchAnTab(el,tab){
+  document.querySelectorAll('.an-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  ['overview','scatter','top'].forEach(t=>{const d=document.getElementById('anTab-'+t);if(d)d.style.display=t===tab?'block':'none';});
+  if(tab==='scatter')buildScatterChart();
+}
+function renderAnalytics(){
+  const empty=document.getElementById('analyticsEmpty'),content=document.getElementById('analyticsContent');
+  if(!state.allProducts.length){empty.style.display='block';content.style.display='none';return;}
+  empty.style.display='none';content.style.display='block';
+  const prods=state.allProducts,comms=prods.map(p=>parseFloat(p.commissionRate||0)*100),scores=prods.map(p=>scoreProduct(p)),wSel=prods.filter(p=>parseFloat(p.sellerCommissionRate||0)>0),avgC=comms.reduce((a,b)=>a+b,0)/comms.length;
+  document.getElementById('akTotal').textContent=prods.length;
+  document.getElementById('akAvgComm').textContent=avgC.toFixed(1)+'%';
+  document.getElementById('akAvgSub').textContent=`máx: ${Math.max(...comms).toFixed(1)}%`;
+  document.getElementById('akScore').textContent=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+  document.getElementById('akSeller').textContent=wSel.length;
+  document.getElementById('akSellerSub').textContent=`${((wSel.length/prods.length)*100).toFixed(0)}% do total`;
+  buildCommChart(prods);buildShopChart(prods);buildScoreChart(prods,scores);buildTopTable(prods);
+}
+function buildCommChart(prods){
+  destroyChart('comm');
+  const b={'<5%':0,'5–10%':0,'10–15%':0,'15–20%':0,'>20%':0};
+  prods.forEach(p=>{const c=parseFloat(p.commissionRate||0)*100;if(c<5)b['<5%']++;else if(c<10)b['5–10%']++;else if(c<15)b['10–15%']++;else if(c<20)b['15–20%']++;else b['>20%']++;});
+  _charts.comm=new Chart(document.getElementById('chartComm').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(b),datasets:[{data:Object.values(b),backgroundColor:[PAL.m,PAL.y,PAL.g,PAL.b,PAL.p],borderColor:'#0A0A0D',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#9E9AA6',padding:12,font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:ctx=>`  ${ctx.label}: ${ctx.raw} (${((ctx.raw/prods.length)*100).toFixed(1)}%)`}}},onClick(_,els){if(els.length)toast(`Faixa ${Object.keys(b)[els[0].index]}: ${Object.values(b)[els[0].index]} produto(s)`,'info');}}});
+}
+function buildShopChart(prods){
+  destroyChart('shop');
+  const t={'Padrão':0,'Star':0,'Star+':0,'Mall':0};
+  prods.forEach(p=>{t[{1:'Mall',2:'Star',4:'Star+'}[p.shopType]||'Padrão']++;});
+  _charts.shop=new Chart(document.getElementById('chartShop').getContext('2d'),{type:'bar',data:{labels:Object.keys(t),datasets:[{label:'Produtos',data:Object.values(t),backgroundColor:[PAL.m,PAL.yB,PAL.bB,PAL.pB],borderColor:[PAL.m,PAL.y,PAL.b,PAL.p],borderWidth:1.5,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} produto(s)`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6E6B76'}},y:{grid:{display:false},ticks:{color:'#9E9AA6'}}}}});
+}
+function buildScoreChart(prods,scores){
+  destroyChart('score');
+  const bins=Array(10).fill(0);scores.forEach(s=>{bins[Math.min(Math.floor(s/10),9)]++;});
+  const labels=bins.map((_,i)=>`${i*10}–${i*10+9}`),colors=bins.map((_,i)=>i>=7?PAL.g:i>=4?PAL.y:PAL.m);
+  _charts.score=new Chart(document.getElementById('chartScore').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Produtos',data:bins,backgroundColor:colors,borderWidth:0,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>`Score ${ctx[0].label}`,label:ctx=>` ${ctx.raw} produto(s)`}}},scales:{x:{grid:{display:false},ticks:{color:'#6E6B76'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6E6B76',stepSize:1}}}}});
+}
+function buildScatterChart(){
+  destroyChart('scatter');if(!state.allProducts.length)return;
+  const pts=state.allProducts.map(p=>({x:parseFloat(p.commissionRate||0)*100,y:scoreProduct(p),label:p.productName||'?',shop:p.shopName||'?'}));
+  _charts.scatter=new Chart(document.getElementById('chartScatter').getContext('2d'),{type:'scatter',data:{datasets:[{label:'Produtos',data:pts,backgroundColor:pts.map(pt=>pt.y>=70?PAL.gB:pt.y>=45?PAL.yB:PAL.m),borderColor:pts.map(pt=>pt.y>=70?PAL.g:pt.y>=45?PAL.y:PAL.m),borderWidth:1.5,pointRadius:5,pointHoverRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>[`  ${ctx.raw.label.substring(0,40)}${ctx.raw.label.length>40?'…':''}`,`  Loja: ${ctx.raw.shop}`,`  Comissão: ${ctx.raw.x.toFixed(1)}%  |  Score: ${ctx.raw.y}`],title:()=>''}}},scales:{x:{title:{display:true,text:'Comissão Total (%)',color:'#6E6B76'},grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6E6B76',callback:v=>v+'%'}},y:{title:{display:true,text:'Score de Oportunidade',color:'#6E6B76'},grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6E6B76'},min:0,max:100}}}});
+}
+function buildTopTable(prods){
+  const top=[...prods].sort((a,b)=>scoreProduct(b)-scoreProduct(a)).slice(0,15);
+  const tc=s=>s>=70?'tag-green':s>=45?'tag-yellow':'tag-orange';
+  document.getElementById('topTableBody').innerHTML=top.map((p,i)=>{
+    const s=scoreProduct(p);
+    return `<tr style="cursor:pointer" onclick="goPage('search');openDetail('${esc(String(p.itemId))}')">
+      <td style="color:var(--muted);font-family:'Space Mono',monospace;font-size:.7rem">${i+1}</td>
+      <td style="max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.productName||'—')}</td>
+      <td><strong style="color:${s>=70?'var(--green)':s>=45?'var(--yellow)':'var(--muted)'}">${s}</strong></td>
+      <td><span class="table-tag ${tc(s)}">${formatComm(p.commissionRate)}</span></td>
+      <td style="color:var(--yellow);font-family:'Space Mono',monospace;font-size:.7rem">${formatComm(p.sellerCommissionRate)}</td>
+      <td style="color:var(--yellow);font-size:.74rem">${p.ratingStar?'★ '+parseFloat(p.ratingStar).toFixed(1):'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:.7rem">${p.priceMin?'R$'+(p.priceMin/100000).toFixed(2).replace('.',','):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* EXPORT CSV */
+function exportCSV(){
+  if(!state.products.length){toast('Nada para exportar.','error');return;}
+  const cols=['ID','Nome','Loja','Tipo Loja','Comissão Total%','Seller Comm%','Shopee Comm%','Preço Min R$','Preço Max R$','Desconto%','Vendas','Avaliação','Score','Link Afiliado'];
+  const rows=state.products.map(p=>[p.itemId,'"'+(p.productName||'').replace(/"/g,'')+'"','"'+(p.shopName||'').replace(/"/g,'')+'"',{1:'Mall',2:'Star',4:'Star+'}[p.shopType]||'Padrão',(parseFloat(p.commissionRate||0)*100).toFixed(2),(parseFloat(p.sellerCommissionRate||0)*100).toFixed(2),(parseFloat(p.shopeeCommissionRate||0)*100).toFixed(2),p.priceMin?(p.priceMin/100000).toFixed(2):'',p.priceMax?(p.priceMax/100000).toFixed(2):'',p.priceDiscountRate?(parseFloat(p.priceDiscountRate)*100).toFixed(0):'',p.sales||'',p.ratingStar||'',scoreProduct(p),p.offerLink||p.productLink||'']);
+  const csv=[cols.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  Object.assign(document.createElement('a'),{href:url,download:`shopee-afiliados-${new Date().toISOString().slice(0,10)}.csv`}).click();
+  URL.revokeObjectURL(url);toast('CSV exportado ✓','success');
+}
+
+/* PRESETS */
+const PRESETS={
+  default     :{listType:'1',sortType:'5',keySeller:'',    ams:'true',minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
+  maxComm     :{listType:'1',sortType:'5',keySeller:'true',ams:'true',minComm:'10',minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
+  recentes    :{listType:'1',sortType:'5',keySeller:'',    ams:'',    minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
+  keySellers  :{listType:'0',sortType:'5',keySeller:'true',ams:'',    minComm:'',  minRating:'4',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
+  desconto    :{listType:'0',sortType:'3',keySeller:'',    ams:'',    minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
+  maisVendidos:{listType:'2',sortType:'2',keySeller:'',    ams:'',    minComm:'',  minRating:'4',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
+  goldHidden  :{listType:'2',sortType:'2',keySeller:'',    ams:'',    minComm:'3', minRating:'4',shopType:'all',minScore:'',minVelocity:'10',minDispute:'40'},
+};
+function applyPreset(el,key){
+  document.querySelectorAll('.preset-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');
+  const p=PRESETS[key];
+  document.getElementById('fListType').value=p.listType;document.getElementById('fSortType').value=p.sortType;
+  document.getElementById('fKeySeller').value=p.keySeller;document.getElementById('fAms').value=p.ams;
+  document.getElementById('fMinComm').value=p.minComm;document.getElementById('fMinRating').value=p.minRating;
+  document.getElementById('fShopType').value=p.shopType;document.getElementById('fMinScore').value=p.minScore;
+  document.getElementById('fMinVelocity').value=p.minVelocity||'';
+  document.getElementById('fMinDispute').value=p.minDispute||'';
+  invalidatePrefetchCache();if(state.connected)search();
+}
+function clearFilters(){
+  ['fKeyword','fMinComm','fMinScore','fMinVelocity','fMinDispute'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fMinRating').value='0';document.getElementById('fKeySeller').value='';
+  document.getElementById('fAms').value='true';document.getElementById('fShopType').value='all';
+  document.getElementById('fListType').value='1';document.getElementById('fSortType').value='5';
+  document.querySelectorAll('.preset-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('[onclick*="default"]')?.classList.add('active');
+  invalidatePrefetchCache();updateActiveTags();
+}
+
+/* ACTIVE TAGS */
+let _tagActions=[];
+function updateActiveTags(){
+  _tagActions=[];const tags=[];
+  const kw=document.getElementById('fKeyword').value.trim(),
+        minC=document.getElementById('fMinComm').value,
+        minR=document.getElementById('fMinRating').value,
+        minS=document.getElementById('fMinScore').value,
+        minV=document.getElementById('fMinVelocity').value,
+        minD=document.getElementById('fMinDispute').value,
+        ks=document.getElementById('fKeySeller').value,
+        ams=document.getElementById('fAms').value,
+        stype=document.getElementById('fShopType').value;
+  if(kw){tags.push(`Keyword: "${esc(kw)}"`);_tagActions.push(()=>{document.getElementById('fKeyword').value='';});}
+  if(minC){tags.push(`Comm ≥ ${minC}%`);_tagActions.push(()=>{document.getElementById('fMinComm').value='';});}
+  if(parseFloat(minR)>0){tags.push(`Rating ≥ ${minR}★`);_tagActions.push(()=>{document.getElementById('fMinRating').value='0';});}
+  if(parseFloat(minS)>0){tags.push(`Score ≥ ${minS}`);_tagActions.push(()=>{document.getElementById('fMinScore').value='';});}
+  if(parseFloat(minV)>0){tags.push(`Velocidade ≥ ${minV}/dia`);_tagActions.push(()=>{document.getElementById('fMinVelocity').value='';});}
+  if(parseFloat(minD)>0){tags.push(`Baixa Disputa ≥ ${minD}`);_tagActions.push(()=>{document.getElementById('fMinDispute').value='';});}
+  if(ks){tags.push('Key Sellers');_tagActions.push(()=>{document.getElementById('fKeySeller').value='';});}
+  if(ams){tags.push('Com AMS');_tagActions.push(()=>{document.getElementById('fAms').value='';});}
+  if(stype!=='all'){tags.push(`Loja: ${stype}`);_tagActions.push(()=>{document.getElementById('fShopType').value='all';});}
+  document.getElementById('activeTags').innerHTML=tags.map((t,i)=>`<div class="filter-tag">${t}<button onclick="clearTag(${i})" aria-label="Remover filtro">✕</button></div>`).join('');
+}
+function clearTag(i){_tagActions[i]?.();invalidatePrefetchCache();updateActiveTags();if(state.connected)search();}
+
+/* NAVIGATION */
+const PAGE_META={search:{title:'Buscar Produtos',sub:'Encontre oportunidades de alta comissão'},favorites:{title:'Favoritos',sub:'Produtos que você salvou'},history:{title:'Histórico de Buscas',sub:'Repita buscas anteriores rapidamente'},analytics:{title:'Analytics',sub:'Análise dos produtos buscados na sessão'}};
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector(`.nav-item[onclick*="'${id}'"]`)?.classList.add('active');
+  document.getElementById('pageTitle').textContent=PAGE_META[id].title;document.getElementById('pageSubtitle').textContent=PAGE_META[id].sub;
+  state.currentPage=id;closeSidebar();
+  if(id==='favorites')renderFavorites();if(id==='history')renderHistory();if(id==='analytics')renderAnalytics();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sbBackdrop').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sbBackdrop').classList.remove('open');}
+
+/* UTILITIES */
+function formatComm(r){return r?(parseFloat(r)*100).toFixed(1)+'%':'0%';}
+function updateNavBadge(n){const b=document.getElementById('navCount');b.textContent=n;b.style.display=n>0?'inline-block':'none';}
+function showErrorBox(msg){document.getElementById('errorMsg').textContent=msg;document.getElementById('errorBox').style.display='block';}
+function hideErrorBox(){document.getElementById('errorBox').style.display='none';}
+function showEmptyState(icon,title,desc){const el=document.getElementById('initialState');el.innerHTML=`<div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-desc">${desc}</div>`;el.style.display='block';}
+function copyLink(btn,link){copyToClipboard(link);btn.textContent='✅ Copiado!';btn.classList.add('done');setTimeout(()=>{btn.textContent='📋 Copiar';btn.classList.remove('done');},2000);}
+function copyToClipboard(text){if(navigator.clipboard){navigator.clipboard.writeText(text).catch(()=>{});}else{const t=Object.assign(document.createElement('textarea'),{value:text});document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();}}
+function toast(msg,type='info'){const icons={success:'✅',error:'❌',info:'ℹ️'};const el=document.createElement('div');el.className='toast '+type;el.innerHTML=`<span>${icons[type]||'ℹ️'}</span><span>${esc(msg)}</span>`;document.getElementById('toasts').appendChild(el);setTimeout(()=>el.remove(),3300);}
+
+/* INIT */
+restoreCredsFromSession();updateFavCount();updateActiveTags();
+setInterval(updateRateBar,2000);
+let _kwTimer=null;
+document.getElementById('fKeyword').addEventListener('input',()=>{clearTimeout(_kwTimer);_kwTimer=setTimeout(()=>{if(state.connected)search();},DEBOUNCE_MS);});
+document.getElementById('fKeyword').addEventListener('keydown',e=>{if(e.key==='Enter'&&state.connected){clearTimeout(_kwTimer);search();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+</script>
+</body>
+</html>
