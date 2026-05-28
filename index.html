@@ -1004,6 +1004,24 @@ async function retryWithInterpolation(page, params, signal = null) {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   CREDENTIALS HELPERS
+   ══════════════════════════════════════════════════════════ */
+function getAppId() {
+  return (document.getElementById('appId').value || '').trim();
+}
+function saveCredsToSession() {
+  const appId = getAppId();
+  if (appId) sessionStorage.setItem('shopee_app_id', appId);
+}
+function restoreCredsFromSession() {
+  const saved = sessionStorage.getItem('shopee_app_id');
+  if (saved) {
+    const input = document.getElementById('appId');
+    if (input && !input.value) input.value = saved;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
    CONNECT
    ══════════════════════════════════════════════════════════ */
 function setConnected(ok, msg = '') {
