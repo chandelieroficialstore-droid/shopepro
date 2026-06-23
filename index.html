@@ -457,6 +457,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
         <div class="preset-chip" onclick="applyPreset(this,'desconto')">💸 Desconto</div>
         <div class="preset-chip" onclick="applyPreset(this,'maisVendidos')">📦 Mais Vendidos</div>
         <div class="preset-chip" onclick="applyPreset(this,'goldHidden')" style="background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.3);color:var(--yellow)">🏆 Joias Escondidas</div>
+        <div class="preset-chip" onclick="applyPreset(this,'poucoExplorado')" style="background:rgba(61,186,126,.10);border-color:rgba(61,186,126,.3);color:var(--green)">🌱 Pouco Explorado</div>
       </div>
       <div class="filter-bar">
         <div class="filter-grid fg-4">
@@ -475,6 +476,8 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
         <div class="filter-grid fg-5">
           <div class="f-group"><div class="f-lbl">Velocidade mín. vendas/dia</div><input class="f-input" type="number" id="fMinVelocity" placeholder="Ex: 10" min="0" step="1" title="Vendas por dia desde que o produto entrou no programa"></div>
           <div class="f-group"><div class="f-lbl">Baixa disputa mín. (0–100)</div><input class="f-input" type="number" id="fMinDispute" placeholder="Ex: 40" min="0" max="100" step="1" title="Estimativa inversa de concorrência entre afiliados"></div>
+          <div class="f-group"><div class="f-lbl" style="color:var(--green)">🌱 Vendas totais máx.</div><input class="f-input" type="number" id="fMaxSales" placeholder="Ex: 500" min="0" step="1" title="Exibe apenas produtos com menos vendas que este valor — menos saturados por afiliados"></div>
+          <div class="f-group"><div class="f-lbl" style="color:var(--green)">🌱 Dias no programa máx.</div><input class="f-input" type="number" id="fMaxDays" placeholder="Ex: 30" min="0" step="1" title="Exibe produtos que entraram no programa de afiliados há menos de X dias — poucos afiliados os descobriram"></div>
           <div class="f-group"><div class="f-lbl">Páginas para varrer</div>
             <select class="f-select" id="fSweepPages" title="Quantas páginas buscar em modo varredura">
               <option value="3">3 páginas (~60–180 prod.)</option>
@@ -800,6 +803,8 @@ function applyClientFilters(products) {
   const minScore   = parseFloat(document.getElementById('fMinScore').value)    || 0;
   const minVel     = parseFloat(document.getElementById('fMinVelocity').value) || 0;
   const minDispute = parseFloat(document.getElementById('fMinDispute').value)  || 0;
+  const maxSales   = parseFloat(document.getElementById('fMaxSales').value)    || 0;
+  const maxDays    = parseFloat(document.getElementById('fMaxDays').value)     || 0;
   const shopF      = document.getElementById('fShopType').value;
   let out = products;
   if (minComm    > 0) out = out.filter(p => parseFloat(p.commissionRate||0)*100 >= minComm);
@@ -807,6 +812,13 @@ function applyClientFilters(products) {
   if (minScore   > 0) out = out.filter(p => scoreProduct(p) >= minScore);
   if (minVel     > 0) out = out.filter(p => salesVelocity(p) >= minVel);
   if (minDispute > 0) out = out.filter(p => disputeIndex(p) >= minDispute);
+  // 🌱 Filtros "Pouco Explorado"
+  if (maxSales   > 0) out = out.filter(p => parseInt(p.sales||0,10) <= maxSales);
+  if (maxDays    > 0) out = out.filter(p => {
+    if (!p.periodStartTime) return true;
+    const daysIn = (Date.now()/1000 - p.periodStartTime) / 86400;
+    return daysIn <= maxDays;
+  });
   if (shopF === 'mall')     out = out.filter(p => p.shopType === 1);
   if (shopF === 'star')     out = out.filter(p => p.shopType === 2);
   if (shopF === 'starplus') out = out.filter(p => p.shopType === 4);
@@ -1737,13 +1749,14 @@ function exportCSV(){
 
 /* PRESETS */
 const PRESETS={
-  default     :{listType:'1',sortType:'5',keySeller:'',    ams:'true',minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
-  maxComm     :{listType:'1',sortType:'5',keySeller:'true',ams:'true',minComm:'10',minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
-  recentes    :{listType:'1',sortType:'5',keySeller:'',    ams:'',    minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
-  keySellers  :{listType:'0',sortType:'5',keySeller:'true',ams:'',    minComm:'',  minRating:'4',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
-  desconto    :{listType:'0',sortType:'3',keySeller:'',    ams:'',    minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
-  maisVendidos:{listType:'2',sortType:'2',keySeller:'',    ams:'',    minComm:'',  minRating:'4',shopType:'all',minScore:'',minVelocity:'',minDispute:''},
-  goldHidden  :{listType:'2',sortType:'2',keySeller:'',    ams:'',    minComm:'3', minRating:'4',shopType:'all',minScore:'',minVelocity:'10',minDispute:'40'},
+  default     :{listType:'1',sortType:'5',keySeller:'',    ams:'true',minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:'',maxSales:'',   maxDays:''},
+  maxComm     :{listType:'1',sortType:'5',keySeller:'true',ams:'true',minComm:'10',minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:'',maxSales:'',   maxDays:''},
+  recentes    :{listType:'1',sortType:'5',keySeller:'',    ams:'',    minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:'',maxSales:'',   maxDays:''},
+  keySellers  :{listType:'0',sortType:'5',keySeller:'true',ams:'',    minComm:'',  minRating:'4',shopType:'all',minScore:'',minVelocity:'',minDispute:'',maxSales:'',   maxDays:''},
+  desconto    :{listType:'0',sortType:'3',keySeller:'',    ams:'',    minComm:'',  minRating:'0',shopType:'all',minScore:'',minVelocity:'',minDispute:'',maxSales:'',   maxDays:''},
+  maisVendidos:{listType:'2',sortType:'2',keySeller:'',    ams:'',    minComm:'',  minRating:'4',shopType:'all',minScore:'',minVelocity:'',minDispute:'',maxSales:'',   maxDays:''},
+  goldHidden    :{listType:'2',sortType:'2',keySeller:'',    ams:'',    minComm:'3', minRating:'4',shopType:'all',minScore:'',minVelocity:'10',minDispute:'40',maxSales:'',   maxDays:''},
+  poucoExplorado:{listType:'1',sortType:'5',keySeller:'',    ams:'',    minComm:'3', minRating:'3',shopType:'all',minScore:'',minVelocity:'',  minDispute:'',  maxSales:'1000',maxDays:'30'},
 };
 function applyPreset(el,key){
   document.querySelectorAll('.preset-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');
@@ -1754,10 +1767,12 @@ function applyPreset(el,key){
   document.getElementById('fShopType').value=p.shopType;document.getElementById('fMinScore').value=p.minScore;
   document.getElementById('fMinVelocity').value=p.minVelocity||'';
   document.getElementById('fMinDispute').value=p.minDispute||'';
+  document.getElementById('fMaxSales').value=p.maxSales||'';
+  document.getElementById('fMaxDays').value=p.maxDays||'';
   invalidatePrefetchCache();if(state.connected)search();
 }
 function clearFilters(){
-  ['fKeyword','fMinComm','fMinScore','fMinVelocity','fMinDispute'].forEach(id=>document.getElementById(id).value='');
+  ['fKeyword','fMinComm','fMinScore','fMinVelocity','fMinDispute','fMaxSales','fMaxDays'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fMinRating').value='0';document.getElementById('fKeySeller').value='';
   document.getElementById('fAms').value='true';document.getElementById('fShopType').value='all';
   document.getElementById('fListType').value='1';document.getElementById('fSortType').value='5';
@@ -1776,6 +1791,8 @@ function updateActiveTags(){
         minS=document.getElementById('fMinScore').value,
         minV=document.getElementById('fMinVelocity').value,
         minD=document.getElementById('fMinDispute').value,
+        maxSl=document.getElementById('fMaxSales').value,
+        maxDy=document.getElementById('fMaxDays').value,
         ks=document.getElementById('fKeySeller').value,
         ams=document.getElementById('fAms').value,
         stype=document.getElementById('fShopType').value;
@@ -1785,6 +1802,8 @@ function updateActiveTags(){
   if(parseFloat(minS)>0){tags.push(`Score ≥ ${minS}`);_tagActions.push(()=>{document.getElementById('fMinScore').value='';});}
   if(parseFloat(minV)>0){tags.push(`Velocidade ≥ ${minV}/dia`);_tagActions.push(()=>{document.getElementById('fMinVelocity').value='';});}
   if(parseFloat(minD)>0){tags.push(`Baixa Disputa ≥ ${minD}`);_tagActions.push(()=>{document.getElementById('fMinDispute').value='';});}
+  if(parseFloat(maxSl)>0){tags.push(`🌱 Vendas ≤ ${maxSl}`);_tagActions.push(()=>{document.getElementById('fMaxSales').value='';});}
+  if(parseFloat(maxDy)>0){tags.push(`🌱 ≤ ${maxDy} dias no programa`);_tagActions.push(()=>{document.getElementById('fMaxDays').value='';});}
   if(ks){tags.push('Key Sellers');_tagActions.push(()=>{document.getElementById('fKeySeller').value='';});}
   if(ams){tags.push('Com AMS');_tagActions.push(()=>{document.getElementById('fAms').value='';});}
   if(stype!=='all'){tags.push(`Loja: ${stype}`);_tagActions.push(()=>{document.getElementById('fShopType').value='all';});}
